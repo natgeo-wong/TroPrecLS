@@ -2,12 +2,13 @@
 
 caseid ='TroPrecLS-Control',
 
-dx = 2000.,
-dy = 2000.,
+dx = 1000.,
+dy = 1000.,
 dt = 20.,
 
-nrestart     = 0,
-perturb_type = 0,
+nrestart      = 0,
+nrestart_skip = 23,
+perturb_type  = 0,
 
 CEM   = .true.,
 OCEAN = .true.,
@@ -20,7 +21,6 @@ doprecip         = .true.,
 dolongwave       = .true.,
 doshortwave      = .true.,
 dosurface        = .true.,
-doseawater       = .true.,
 dodynamicocean   = .false.,
 dolargescale     = .false.,
 doradforcing     = .false.,
@@ -28,10 +28,6 @@ dosfcforcing     = .false.,
 docoriolis       = .false.,
 donudging_uv     = .false.,
 donudging_tq     = .false.,
-doDge_SnowAndIce = .true.,
-
-disablecloudradiation    = .false.,
-disablecloudradiation_sw = .false.,
 
 tauls = 3600.,
 
@@ -52,17 +48,17 @@ nrad = 12,
 ! below values are equivalent to insolation = 423.4773 W/m2
 !   coszrs = 0.732650
 
-doperpetual     = .false.,
+doperpetual     = .true.,
 doseasons       = .false.,
 dosolarconstant = .true.,
-zenith_angle    = 51.7,
-solar_constant  = 1354.23,
+zenith_angle    = 0.0,
+solar_constant  = 431.06,
 
 doisccp = .false.,
 domodis = .false.,
 domisr  = .false.,
 
-nstop    = 1728000,
+nstop    = 8640000,
 nprint   = 4320,
 nstat    = 4320,    ! Calculate statistics every hour!
 nstatfrq = 288,     ! Collect 60 samples per statistical calculation (every 1 minute)
@@ -70,8 +66,8 @@ nstatfrq = 288,     ! Collect 60 samples per statistical calculation (every 1 mi
 doSAMconditionals     = .false.,
 dosatupdnconditionals = .false.,
 
-nsave2D      = 45,
-nsave2Dstart = 1512000,
+nsave2D      = 90,
+nsave2Dstart = 8208000,
 nsave2Dend   = 999999999,
 save2Dbin    = .true.,
 save2Davg    = .true.,
