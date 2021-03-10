@@ -10,7 +10,7 @@ function outstatname(
 )
 
     if isensemble
-    	  expname = "$(experiment)-nensemble$(@sprintf("%02d",member))"
+    	  expname = "$(experiment)-member$(@sprintf("%02d",member))"
     else; expname = experiment
     end
 
