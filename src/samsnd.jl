@@ -7,22 +7,36 @@ function createsndmean(
     exp::AbstractString, config::AbstractString,
     ndays::Integer=100, psfc::Real, extract=false
 )
+    
     mkpath(projectdir("exp/snd")); fsnd = projectdir("exp/snd/$(sndname)")
     statds = NCDataset(datadir("$exp/$config/OUT_STAT/RCE_TroPrecLS-$exp.nc"))
 
-    nz = statds.dim["z"]; nt = statds.dim["time"]; p = statds["p"][:]
+    nz = statds.dim["z"]; nt = statds.dim["time"]; z = statds["z"][:]
     dt = (statds["time"][end] - statds["time"][1]) / (nt-1)
     dystep = round(Int,1/dt); beg = ndays*dystep-1
 
     snddata = zeros(nz,6)
-    snddata[:,1] .= -999; snddata[:,2] .= p
+    snddata[:,1] .= z; snddata[:,2] .= -999.0
     snddata[:,3] .= dropdims(mean(statds["THETA"][:,(end-beg):end],dims=2),dims=2)
     snddata[:,4] .= dropdims(mean(statds["QT"][:,(end-beg):end],dims=2),dims=2)
     close(statds)
 
     printsnd(fsnd,snddata,psfc)
 
-    if extract; return p,snddata end
+    if extract; return z,snddata end
+
+end
+
+function createsndmean(
+    sndname::AbstractString,
+    snddata::AbstractArray;
+    psfc::Real, extract=false
+)
+
+    mkpath(projectdir("exp/snd")); fsnd = projectdir("exp/snd/$(sndname)")
+    printsnd(fsnd,snddata,psfc)
+
+    if extract; return z,snddata end
 
 end
 
