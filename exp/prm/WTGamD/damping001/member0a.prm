@@ -1,6 +1,6 @@
 &PARAMETERS
 
-caseid ='TroPrecLS-WTGamD-member01',
+caseid ='TroPrecLS-WTGamD-member0a',
 
 dx = 1000.,
 dy = 1000.,
@@ -63,8 +63,8 @@ domisr  = .false.,
 
 nstop    = 432000,
 nprint   = 4320,
-nstat    = 4320,    ! Calculate statistics every hour!
-nstatfrq = 288,     ! Collect 60 samples per statistical calculation (every 1 minute)
+nstat    = 180,    ! Calculate statistics every hour!
+nstatfrq = 60,     ! Collect 60 samples per statistical calculation (every 1 minute)
 
 doSAMconditionals     = .false.,
 dosatupdnconditionals = .false.,
