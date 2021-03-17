@@ -9,7 +9,7 @@ dt = 20.,
 doensemble    = .true.,
 nensemble     = 6,
 nrestart      = 0,
-nrestart_skip = 23,
+nrestart_skip = 239,
 perturb_type  = 0,
 
 CEM   = .true.,
