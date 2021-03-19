@@ -6,8 +6,11 @@ dx = 1000.,
 dy = 1000.,
 dt = 20.,
 
-nrestart     = 0,
-perturb_type = 0,
+doensemble    = .false.,
+nensemble     = 1,
+nrestart      = 0,
+nrestart_skip = 239,
+perturb_type  = 0,
 
 CEM   = .true.,
 OCEAN = .true.,
@@ -20,7 +23,6 @@ doprecip         = .true.,
 dolongwave       = .true.,
 doshortwave      = .true.,
 dosurface        = .true.,
-doseawater       = .true.,
 dodynamicocean   = .true.,
 dolargescale     = .true.,
 doradforcing     = .false.,
@@ -28,10 +30,6 @@ dosfcforcing     = .false.,
 docoriolis       = .false.,
 donudging_uv     = .false.,
 donudging_tq     = .false.,
-doDge_SnowAndIce = .true.,
-
-disablecloudradiation    = .false.,
-disablecloudradiation_sw = .false.,
 
 timelargescale = 0
 tauls = 3600.,
@@ -45,7 +43,7 @@ day0       = 80.5,
 tabs_s     = 301.70,
 Szero      = 0,
 
-depth_slab_ocean = 0.1,
+depth_slab_ocean = 0.5,
 
 nrad = 12,
 
@@ -63,16 +61,16 @@ doisccp = .false.,
 domodis = .false.,
 domisr  = .false.,
 
-nstop    = 1728000,
+nstop    = 1296000,
 nprint   = 4320,
-nstat    = 540,    ! Calculate statistics every hour!
-nstatfrq = 180,     ! Collect 60 samples per statistical calculation (every 1 minute)
+nstat    = 180,    ! Calculate statistics every hour!
+nstatfrq = 12,     ! Collect 60 samples per statistical calculation (every 1 minute)
 
 doSAMconditionals     = .false.,
 dosatupdnconditionals = .false.,
 
 nsave2D      = 90,
-nsave2Dstart = 1512000,
+nsave2Dstart = 1080000,
 nsave2Dend   = 999999999,
 save2Dbin    = .true.,
 save2Davg    = .true.,
@@ -89,10 +87,10 @@ rad3Dout     = .true.,
 
 compute_advection_everywhere = .true.,
 dowtg_blossey_etal_JAMES2009 = .true., ! alternate implementation
-twtg_scale = 0, ! If WTG/Large-scale is turned on for 100 days, twtg_scale = 1/4 means that the scaling up to WTG from pseudo-RCE occurs over 25 days.
+twtg_scale = 0., ! If WTG/Large-scale is turned on for 100 days, twtg_scale = 1/4 means that the scaling up to WTG from pseudo-RCE occurs over 25 days.
 
 am_wtg  = 2.,                           ! momentum damping rate in 1/d -- note must be non-zero, default= 2.,
-am_wtg_exp = 1.,                        ! exponent of p/p0 in momentum damping rate.
+am_wtg_exp = 0.,                        ! exponent of p/p0 in momentum damping rate.
 lambda_wtg = 650.e3,                    ! quarter wavelength in m. default = 650.e3 (=650 km).
 
 dowtg_qnudge = .false.,                 ! if T, nudge q profile to observations on below timescale
