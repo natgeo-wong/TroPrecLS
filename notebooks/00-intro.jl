@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
@@ -35,7 +35,11 @@ The general outline of this project is:
 * Transitioning the model from RCE/pseudo-RCE to WTG state
 * Investigating the senstivity of WTG momentum damping parameter $a_m$
 
-7. The Impact of the Diurnal Cycle on P-r
+7. Explore the equilibrium RCE states in SAM
+* Plot the 2D rain/PWV fields ... is there convective aggregation?
+
+
+8. The Impact of the Diurnal Cycle on P-r
 * Calculate energy imbalance when slab depth is infinity
 * Investigate slab-depth and the diurnal amplitude of SST
 "

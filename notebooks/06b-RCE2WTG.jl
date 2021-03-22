@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.21
 
 using Markdown
 using InteractiveUtils
@@ -120,98 +120,125 @@ md"
 "
 
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
-exp = "3S"
+exp = "D"
 
 # ╔═╡ bdfa9872-5b35-11eb-059e-ad1ac171d295
-am_wtg = 1
+am_wtg = 0
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
-	_,_,t = retrievedims("$(exp)WTGamExp$(am_wtg)","dampingInfd0")
-	t = t .- 80
+	expname = "WTGam$(exp)"
 	configvec = [
-		"damping02d00",
-		"damping04d00",
-		"damping08d00",
-		"damping16d00",
-		"damping32d00",
-		"damping64d00",
-		"damping128d0",
-		#"damping256d0",
-		"damping512d0"
+		"damping001",
+		# "damping002",
+		# "damping004",
+		# "damping008",
+		# "damping016",
+		# "damping032",
+		# "damping064",
+		# "damping128",
 	]
 	ncon = length(configvec)
-	colors = pplt.Colors("Blues",(ncon+2))
-	lgd = Dict("frame"=>false,"ncols"=>1)
+	blues = pplt.Colors("Blues",(ncon+2))
+	reds  = pplt.Colors("Reds",(ncon+2))
+	teals = pplt.Colors("Teal",(ncon+2))
+	lgd = Dict("frame"=>false,"ncols"=>4)
 md"Loading time dimension and defining the damping experiments ..."
 end
 
-# ╔═╡ 49ad8588-5b62-11eb-2e9d-a357ab55bc2a
-begin
-	pplt.close(); fts,ats = pplt.subplots(aspect=1.5,axwidth=3)
+# ╔═╡ 223b4286-8811-11eb-0e67-4da65e1999a5
+function daymean(data)
 	
-	for icon in 1 : ncon
-		config = configvec[icon]
+	return dropdims(mean(reshape(data,24,:),dims=1),dims=1)
+	
+end
+
+# ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
+begin
+	pplt.close()
+	fts,ats = pplt.subplots(nrows=3,aspect=3,axwidth=3,hspace=0.2,sharey=0)
+	
+	for ic in 1 : ncon
+		config = configvec[ic]
 		config = replace(config,"damping"=>"")
 		config = replace(config,"d"=>".")
 		config = parse(Float64,config)
-		prcp = retrievevar("PREC","$(exp)WTGamExp$(am_wtg)",configvec[icon])
-		ats[1].plot(
-			t,prcp,lw=1,color=colors[icon+1],
-			label=(L"$a_m =$" * " $config"),
-			legend="r",legend_kw=lgd
-		)
+		imem = 0
+		
+		while imem < 100; imem += 1
+			fnc = outstatname(expname,configvec[ic],false,true,imem)
+			if isfile(fnc)
+				_,_,t = retrievedims(fnc); t = t .- 80
+				td = daymean(t)
+				rn = retrievevar("PREC",fnc)
+				pr = retrievevar("AREAPREC",fnc)
+				rn = rn ./ pr
+				sw = daymean(retrievevar("SWNS",fnc))
+				lw = daymean(retrievevar("LWNS",fnc))
+				sh = daymean(retrievevar("SHF",fnc))
+				lh = daymean(retrievevar("LHF",fnc))
+				pw = daymean(retrievevar("PW",fnc))
+				seb = sw .- lw .- sh .- lh
+				ats[1].plot(t,rn,lw=1,color=blues[ic+1])
+				ats[2].plot(td,seb,lw=1,color=reds[ic+1])
+				if imem == 1
+					ats[3].plot(
+						td,pw,lw=1,color=teals[ic+1],
+						label=(L"$a_m =$" * " $config"),
+						legend="b",legend_kw=lgd
+					)
+				else
+					ats[3].plot(td,pw,lw=1,color=teals[ic+1])
+				end
+			end
+		end
+		
 	end
 	
-	prcpRCE = retrievevar("PREC","$(exp)WTGamExp$(am_wtg)","dampingInfd0")
-	ats[1].plot(t,prcpRCE,lw=1,color="k",label="RCE",legend="r")
+	for imem = 1 : 5
+		fnc = outstatname(expname,"dampingInf",false,true,imem)
+		if isfile(fnc)
+			_,_,t = retrievedims(fnc); t = t .- 80
+				t  = daymean(t)
+				pr = daymean(retrievevar("PREC",fnc))
+				sw = daymean(retrievevar("SWNS",fnc))
+				lw = daymean(retrievevar("LWNS",fnc))
+				sh = daymean(retrievevar("SHF",fnc))
+				lh = daymean(retrievevar("LHF",fnc))
+			seb = sw .- lw .- sh .- lh
+			ats[1].plot(t,pr,lw=1,color="k")
+			if imem == 1
+				ats[2].plot(t,seb,lw=1,color="k",label="RCE",legend="b")
+			else
+				ats[2].plot(t,seb,lw=1,color="k")
+			end
+		end
+	end
 	
 	ats[1].format(
-		xlim=(0,400),xlabel="Time / Days",
-		ylim=(0.1,200),yscale="log",ylabel=L"Precipitation Rate / mm day$^{-1}$",
-		suptitle="$(exp)WTGamExp$(am_wtg)"
+		xlim=(0,250),xlabel="Time / Days",
+		# ylocator=10. .^(-3:3),ylabel=L"Rainfall / mm day$^{-1}$",yscale="log",
+		# ylim=(5,200),
+		suptitle=expname
 	)
+	
+	ats[2].format(
+		xlim=(0,250),xlabel="Time / Days",
+		ylim=(-100,100),ylabel=L"SEB / W m$^{-2}$",ylocator=(-3:3)*100,
+		suptitle=expname
+	)
+	
+	ats[3].format(
+		xlim=(225,250),xlabel="Time / Days",
+		ylim=(0,80),ylabel="PW / mm",
+		suptitle=expname
+	)
+	
 	fts.savefig(plotsdir(
-		"rce2wtg-$(exp)WTGamExp$(am_wtg).png"),
+		"rce2wtg-$(expname).png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("rce2wtg-$(exp)WTGamExp$(am_wtg).png"))
-end
-
-# ╔═╡ 7c9cc168-5b6a-11eb-332a-3bfcfe9453fb
-expvec = ["3P","3S"]; nexp = length(expvec)
-
-# ╔═╡ 048e5a08-5b3b-11eb-0b13-efe1a204e66a
-begin
-	amvec = [0,1];   nam  = length(amvec)
-	prcp = zeros(length(configvec))
-	
-	pplt.close(); fp,ap = pplt.subplots(aspect=1.5,axwidth=3)
-	
-	for iexp = 1 : nexp, iam in 1 : nam
-		for icon in 1 : ncon
-			prcp[icon] = mean(retrievevar(
-				"PREC","$(expvec[iexp])WTGamExp$(amvec[iam])",configvec[icon]
-					)[(end-1199):end])
-		end
-		ap[1].plot(
-			2 .^(1:9),prcp,
-			label=("$(expvec[iexp]), "* L"$a_m =$" * " $(amvec[iam])"),
-			legend="r",legend_kw=lgd
-		)
-		ap[1].scatter(2 .^(1:9),prcp,s=10)
-	end
-	
-	
-	ap[1].format(
-		xlim=(1,1000),xscale="log",xlabel=L"$a_m$",
-		ylim=(0.1,200),yscale="log",ylabel=L"Precipitation Rate / mm day$^{-1}$",
-	)
-	fp.savefig(plotsdir(
-		"rce2wtg-$(exp)WTG-prcp.png"),
-		transparent=false,dpi=200
-	)
-	load(plotsdir("rce2wtg-$(exp)WTG-prcp.png"))
+	load(plotsdir("rce2wtg-$(expname).png"))
 end
 
 # ╔═╡ Cell order:
@@ -227,6 +254,5 @@ end
 # ╠═d3b025e0-5b35-11eb-330a-5fbb2204da63
 # ╠═bdfa9872-5b35-11eb-059e-ad1ac171d295
 # ╠═a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
-# ╠═49ad8588-5b62-11eb-2e9d-a357ab55bc2a
-# ╠═7c9cc168-5b6a-11eb-332a-3bfcfe9453fb
-# ╟─048e5a08-5b3b-11eb-0b13-efe1a204e66a
+# ╟─223b4286-8811-11eb-0e67-4da65e1999a5
+# ╠═55230f4a-7661-11eb-1c37-8b022b95e08e

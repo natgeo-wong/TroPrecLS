@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
@@ -36,8 +36,8 @@ In this notebook, we do sanity checks on the Weak-Temperature Gradient module in
 
 # ╔═╡ de44e1dc-542d-11eb-33f0-19a085e56922
 begin
-	rceexp = "3S"
-	amexp = 0
+	rceexp = "3P"
+	amexp = 1
 	exper = "$(rceexp)WTGamExp$(amexp)"
 end
 
@@ -214,7 +214,7 @@ begin
 	)
 	
 	plotWTG3D(awtg,1,p,tair_WTG,configs,colors)
-	awtg[1].format(xlim=(-25,25),ultitle="T / K")
+	awtg[1].format(xlim=(-10,10),ultitle="T / K")
 	
 	plotWTG3D(awtg,2,p,cldf_WTG,configs,colors)
 	awtg[2].format(xlim=(-100,100),ultitle="CLD / %")
@@ -223,13 +223,13 @@ begin
 	awtg[3].format(xlim=(-100,100),ultitle="RH / %")
 	
 	plotWTG3D(awtg,4,p,wtgw_WTG,configs,colors)
-	awtg[4].format(xlim=(-0.2,0.2),ultitle=L"W$_{WTG}$ / m s$^{-1}$")
+	awtg[4].format(xlim=(-0.05,0.05),ultitle=L"W$_{WTG}$ / m s$^{-1}$")
 	
 	plotWTG3D(awtg,5,p,dqdt_WTG,configs,colors,islegend=true)
-	awtg[5].format(xlim=(-15,15),ultitle=L"$\frac{dq}{dt}$ / g kg$^{-1}$ s$^{-1}$")
+	awtg[5].format(xlim=(-5,5),ultitle=L"$\frac{dq}{dt}$ / g kg$^{-1}$ s$^{-1}$")
 	
 	plotWTG3D(awtg,6,p,dTdt_WTG,configs,colors)
-	awtg[6].format(xlim=(-50,50),ultitle=L"$\frac{dT}{dt}$ / K s$^{-1}$")
+	awtg[6].format(xlim=(-20,20),ultitle=L"$\frac{dT}{dt}$ / K s$^{-1}$")
 	
 	for ax in awtg
 		ax.format(

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.17
+# v0.12.21
 
 using Markdown
 using InteractiveUtils
@@ -18,6 +18,7 @@ begin
 	Pkg.instantiate()
 	using NCDatasets
 	using NumericalIntegration
+	using Printf
 	using Statistics
 	
 	using ImageShow, PNGFiles
@@ -41,29 +42,45 @@ md"
 We first create the function `retrievedims` to extract the dimensional data: (1) height (in both vertical `z` and pressure `p` coordinates) and (2) time `t`.  Next, we define the function `retrievevar` to extract variables of interest (one variable at a time):
 "
 
+# ╔═╡ e4b19fb2-74bf-11eb-162e-2f42a9e40fea
+function outstatname(
+	experiment::AbstractString, config::AbstractString,
+	istest::Bool=false,
+	isensemble::Bool=false, member::Integer=0
+)
+
+	if isensemble
+		  expname = "$(experiment)-member$(@sprintf("%02d",member))"
+	else; expname = experiment
+	end
+
+	if istest
+		fnc = datadir(joinpath(
+			experiment,config,"OUT_STAT",
+			"RCE_TroPrecLS-$(expname)-test.nc"
+		))
+	else
+		fnc = datadir(joinpath(
+			experiment,config,"OUT_STAT",
+			"RCE_TroPrecLS-$(expname).nc"
+		))
+	end
+
+	return fnc
+
+end
+
 # ╔═╡ c1489ae0-5114-11eb-3a56-5b75d263ae63
 function retrievedims(
-	experiment::AbstractString,
-	config::AbstractString;
-	istest::Bool=false
+	experiment::AbstractString, config::AbstractString;
+	istest::Bool=false,
+	isensemble::Bool=false, member::Integer=0
 )
-	
-	if istest
-		rce = NCDataset(datadir(joinpath(
-			experiment,config,"OUT_STAT",
-			"RCE_TroPrecLS-$(experiment)-test.nc"
-		)))
-	else
-		rce = NCDataset(datadir(joinpath(
-			experiment,config,"OUT_STAT",
-			"RCE_TroPrecLS-$(experiment).nc"
-		)))
-	end
-	
+
+	rce = NCDataset(outstatname(experiment,config,istest,isensemble,member))
     z = rce["z"][:]
     p = rce["p"][:]
 	t = rce["time"][:]
-	
     close(rce)
 
     return z,p,t
@@ -73,25 +90,13 @@ end
 # ╔═╡ 891e5992-50cf-11eb-208e-71e78380caf7
 function retrievevar(
     variable::AbstractString,
-	experiment::AbstractString,
-	config::AbstractString;
-	istest::Bool=false
+	experiment::AbstractString, config::AbstractString;
+	istest::Bool=false,
+	isensemble::Bool=false, member::Integer=0
 )
-	
-	if istest
-		rce = NCDataset(datadir(joinpath(
-			experiment,config,"OUT_STAT",
-			"RCE_TroPrecLS-$(experiment)-test.nc"
-		)))
-	else
-		rce = NCDataset(datadir(joinpath(
-			experiment,config,"OUT_STAT",
-			"RCE_TroPrecLS-$(experiment).nc"
-		)))
-	end
-	
+
+	rce = NCDataset(outstatname(experiment,config,istest,isensemble,member))
     var = rce[variable][:]
-	
     close(rce)
 
     return var
@@ -132,7 +137,7 @@ Let us now define functions that will plot the time series 2D and 3D variables o
 
 # ╔═╡ 4324677a-5119-11eb-24f1-8d80c5a15ceb
 function plot2Dtimeseries(axs,ii,t,var;dbeg,dend)
-	axs[ii].plot(t,var,lw=1,c="k")
+	axs[ii].plot(t,var,lw=1)
 	axs[ii].format(xlim=(dbeg,dend))
 end
 
@@ -144,7 +149,7 @@ function plot3Dtimeseries(axs,ii,t,p,var;lvl=[],cmapname="Fire",dbeg,dend)
 	else; c = axs[ii].contourf(t,p,var,cmap=cmapname,levels=lvl,extend="both")
 	end
 	
-	axs[ii].format(xlim=(dbeg,dend),ylim=(maximum(p),minimum(p)))
+	axs[ii].format(xlim=(dbeg,dend),ylim=(maximum(p),10))
 	axs[ii].colorbar(c,loc="r")
 	
 end
@@ -213,7 +218,7 @@ function plot3Ddiurnal(axs,ii,t,p,var;lvl=[],cmapname="Fire")
 	else; c = axs[ii+1].contourf(t,p,var,cmap=cmapname,levels=lvl,extend="both")
 	end
 	
-	axs[ii+1].format(xlim=(0,24),ylim=(maximum(p),minimum(p)))
+	axs[ii+1].format(xlim=(0,24),ylim=(maximum(p),20))
 	axs[ii+1].colorbar(c,loc="r")
 	
 end
@@ -238,14 +243,62 @@ md"
 
 # ╔═╡ 5ffd515e-5128-11eb-3b11-815af069d22f
 begin
-	exp = "DiurnalAmp"; config = "slabInfd"; test = false
-	z,p,t = retrievedims(exp,config,istest=test)
-	sst = retrievevar("SST",exp,config,istest=test)
-	prc = retrievevar("PREC",exp,config,istest=test)
-	# tem = retrievevar("TABS",exp,config,istest=test)
-	# tob = retrievevar("TABSOBS",exp,config,istest=test)
-	# v3D = retrievevar("WWTG",exp,config) * 3600
-	# size(v2D), size(v3D)
+	exp = "Control"; config = "DLARGE"
+	istst = true; mbr = 08;
+end
+
+# ╔═╡ f440d5ca-5128-11eb-2574-d58f2f7d8fc3
+begin
+	
+	pplt.close(); fts,axsts = pplt.subplots(nrows=3,aspect=3,axwidth=4)
+	
+	lvls = [
+		-50,-31.6,-20,-14.1,-10,-7.07,
+		-5,-3.16,-2,-1.41,-1,-0.5,
+		0.5,1,1.41,2,3.16,
+		5,
+		7.07,10,14.1,20,31.6,50
+	]/10
+	
+	z,p,t = retrievedims(exp,config,istest=istst,isensemble=true,member=mbr)
+	var2D = retrievevar("AREAPREC",exp,config,istest=istst,isensemble=true,member=mbr)
+	var2A = retrievevar("PREC",exp,config,istest=istst,isensemble=true,member=mbr)
+	var3T = retrievevar("TBIAS",exp,config,istest=istst,isensemble=true,member=mbr)
+	var3Q = retrievevar("QBIAS",exp,config,istest=istst,isensemble=true,member=mbr)
+	varob = retrievevar("QVOBS",exp,config,istest=istst,isensemble=true,member=mbr)
+	
+	plot3Dtimeseries(
+		axsts,1,t.-80,p,var3T,
+		dbeg=0,dend=100,lvl=lvls,cmapname="RdBu_r"
+	)
+	plot3Dtimeseries(
+		axsts,2,t.-80,p,var3Q./varob*100,
+		dbeg=0,dend=100,lvl=lvls*10,cmapname="drywet"
+	)
+	# plot2Dtimeseries(
+	# 	axsts,1,t.-80,var2A,
+	# 	dbeg=0,dend=100
+	# )
+	plot2Dtimeseries(
+		axsts,3,t.-80,var2A,
+		dbeg=700,dend=800
+	)
+	# plot2Dtimeseries(
+	# 	axsts,3,t2.-80,var2D2,
+	# 	dbeg=0,dend=100
+	# )
+	# plot2Dtimeseries(
+	# 	axsts,3,1:24,dropdims(mean(reshape(var2D2[1:(24*24)],24,:),dims=1),dims=1),
+	# 	dbeg=0,dend=100
+	# )
+	
+	axsts[1].format(yscale="log")
+	axsts[2].format(yscale="log")
+	axsts[3].format(ylim=(0,5))
+	
+	fts.savefig("plots.png",transparent=false,dpi=200)
+	load("plots.png")
+	
 end
 
 # ╔═╡ 6b0b697c-5117-11eb-1c0f-13c2840a65d2
@@ -277,85 +330,20 @@ function calcrh(QV,TAIR,P)
 
 end
 
-# ╔═╡ f440d5ca-5128-11eb-2574-d58f2f7d8fc3
-begin
-	
-	pplt.close(); fts,axsts = pplt.subplots(nrows=2,aspect=3,axwidth=3)
-	
-	lvls=vcat(-5:-1,1:5)*20
-	plot2Dtimeseries(axsts,1,t.-80,sst,dbeg=0,dend=200)
-	plot2Dtimeseries(axsts,2,t.-80,prc,dbeg=0,dend=200)
-	# plot3Dtimeseries(
-	# 	axsts,2,t.-80,p,v3D,
-	# 	dbeg=0,dend=40,cmapname="RdBu_r",
-	# 	lvl=vcat(-50,-20,-10,-5,-2,-1,1,2,5,10,20,50)/100
-	# )
-	# plot3Dtimeseries(
-	# 	axsts,2,t.-80,p,tem.-tob[:,1],
-	# 	dbeg=0,dend=40,cmapname="RdBu_r",
-	# 	lvl=vcat(-5:-1,-0.5,0.5,1:5)/10
-	# 	# lvl=vcat(-50,-20,-10,-5,-2,-1,1,2,5,10,20,50)/10
-	# )
-	axsts[1].format(xlim=(0,400))
-	axsts[2].format(ylim=(0.1,100),yscale="log",ylocator=[0.1,1,10,100])
-	
-	fts.savefig("test.png",transparent=false,dpi=200)
-	load("test.png")
-	
-end
+# ╔═╡ 8676ab94-81ef-11eb-2f9f-7716d1507bc2
+md"
+### 4. New things ...
+"
 
-# ╔═╡ a5c073d8-56af-11eb-1b0d-b9152daec781
-begin
-	
-	# pplt.close(); f1,axs1 = pplt.subplots(aspect=0.75,axwidth=2)
-	# axs1[1].plot(dropdims(mean(tem[:,2400:3600],dims=2),dims=2).-tob[:,1],z/1000,label="RCE (WTG) - TABSOBS",legend="t")
-	# axs1[1].scatter(dropdims(mean(tem[:,2400:3600],dims=2),dims=2).-tob[:,1],z/1000)
-	# axs1[1].format(
-	# 	xlim=(-0.2,0.2),ylim=(0,30),#yscale="log",
-	# 	xlabel="T Diff / K",ylabel="Height / km"
-	# )
-	# f1.savefig("testprofile2.png",transparent=false,dpi=200)
-	# load("testprofile2.png")
-	
-end
+# ╔═╡ 3acaf7e6-836f-11eb-34ca-976f461c133c
 
-# ╔═╡ 9625ecea-56b0-11eb-161c-059e398eab70
-argmin(abs.(p.-100))
-
-# ╔═╡ 73871862-56b0-11eb-123a-0b0cb5f8263c
-begin
-	
-	# pplt.close(); f2,axs2 = pplt.subplots(aspect=2)
-	# axs2[1].plot(t.-80,tem[47,:].-v3D[47,1])
-	# axs2[1].format(xlim=(0,40),ylim=(-3,3))
-	# f2.savefig("testts.png",transparent=false,dpi=200)
-	# load("testts.png")
-	
-end
-
-# ╔═╡ 9eab2f9c-5129-11eb-07fc-2d9b382f5d49
-begin
-	
-# 	td,tstep,tshift,beg = t2d(t,100);
-# 	v2Dd = diurnal2D(v2D[(end-beg):end],tstep,tshift);
-# 	v3Dd = diurnal3D(v3D[:,(end-beg):end],tstep,tshift);
-	
-# 	arr = [[0,1,1,1],[2,3,3,3]]
-# 	pplt.close(); fdh,axsdh = pplt.subplots(arr,nrows=2,aspect=2)
-	
-# 	plot2Ddiurnal(axsdh,1,td,v2Dd,subtractm=false)
-# 	plot3Ddiurnal(axsdh,2,td,p,v3Dd)
-	
-# 	fdh.savefig("test2.png",transparent=false,dpi=200)
-# 	load("test2.png")
-	
-end
 
 # ╔═╡ Cell order:
 # ╟─addc35d6-50b3-11eb-02dc-452ced2a45ef
 # ╟─8102297a-50b7-11eb-0430-f79371a66174
-# ╟─9340fa4e-50b4-11eb-253e-ab01deb80456
+# ╠═9340fa4e-50b4-11eb-253e-ab01deb80456
 # ╟─19174960-50cf-11eb-12a3-cf977e483262
+# ╠═e4b19fb2-74bf-11eb-162e-2f42a9e40fea
 # ╠═c1489ae0-5114-11eb-3a56-5b75d263ae63
 # ╠═891e5992-50cf-11eb-208e-71e78380caf7
 # ╟─edc78916-5115-11eb-00a0-498face6f531
@@ -376,7 +364,5 @@ end
 # ╟─504cbace-5128-11eb-1d27-879bffb48098
 # ╠═5ffd515e-5128-11eb-3b11-815af069d22f
 # ╠═f440d5ca-5128-11eb-2574-d58f2f7d8fc3
-# ╠═a5c073d8-56af-11eb-1b0d-b9152daec781
-# ╠═9625ecea-56b0-11eb-161c-059e398eab70
-# ╠═73871862-56b0-11eb-123a-0b0cb5f8263c
-# ╠═9eab2f9c-5129-11eb-07fc-2d9b382f5d49
+# ╟─8676ab94-81ef-11eb-2f9f-7716d1507bc2
+# ╠═3acaf7e6-836f-11eb-34ca-976f461c133c
