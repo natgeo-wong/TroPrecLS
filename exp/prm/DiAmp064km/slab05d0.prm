@@ -1,6 +1,6 @@
 &PARAMETERS
 
-caseid ='TroPrecLS-DiurnalAmp',
+caseid ='TroPrecLS-DiAmp064km',
 
 dx = 1000.,
 dy = 1000.,

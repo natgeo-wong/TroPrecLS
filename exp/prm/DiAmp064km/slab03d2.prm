@@ -1,6 +1,6 @@
 &PARAMETERS
 
-caseid ='TroPrecLS-DiurnalAmp',
+caseid ='TroPrecLS-DiAmp064km',
 
 dx = 1000.,
 dy = 1000.,
@@ -43,7 +43,7 @@ day0       = 80.5,
 tabs_s     = 301.70,
 Szero      = 0,
 
-depth_slab_ocean = 10.,
+depth_slab_ocean = 3.16,
 
 nrad = 12,
 
