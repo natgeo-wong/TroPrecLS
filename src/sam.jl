@@ -76,6 +76,29 @@ function retrievedims(fnc::AbstractString)
 
 end
 
+function retrievedims2D(
+    experiment::AbstractString, config::AbstractString;
+    isensemble::Bool=false, member::Integer=0
+)
+
+    rce = NCDataset(out2Dname(experiment,config,isensemble,member))
+	x = rce["x"][:]
+    t = rce["time"][:]
+
+	if haskey(rce,"y")
+		  isy = true; y = rce["y"][:]
+	else; isy = false
+	end
+
+    close(rce)
+
+	if isy
+    	  return x,y,t
+	else; return x,t
+	end
+
+end
+
 function retrievedims2D(fnc::AbstractString)
 
     rce = NCDataset(fnc)
