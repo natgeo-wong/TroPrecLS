@@ -69,7 +69,7 @@ doSAMconditionals     = .false.,
 dosatupdnconditionals = .false.,
 
 nsave2D      = 90,
-nsave2Dstart = 8208000,
+nsave2Dstart = 6264000,
 nsave2Dend   = 999999999,
 save2Dbin    = .true.,
 save2Davg    = .true.,
