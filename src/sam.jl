@@ -1,3 +1,4 @@
+using Glob
 using NCDatasets
 using NumericalIntegration
 using Printf
@@ -25,6 +26,23 @@ function outstatname(
     		"RCE_TroPrecLS-$(expname).nc"
     	))
     end
+
+    return fnc
+
+end
+
+function out2Dname(
+    experiment::AbstractString, config::AbstractString,
+    isensemble::Bool=false, member::Integer=0
+)
+
+    if isensemble
+    	  expname = "$(experiment)-member$(@sprintf("%02d",member))"
+    else; expname = experiment
+    end
+
+	fnclist = glob("RCE_TroPrecLS-$(expname)*.nc",joinpath(experiment,config,"OUT_2D"))
+    fnc = datadir(fnclist[1])
 
     return fnc
 
@@ -58,6 +76,26 @@ function retrievedims(fnc::AbstractString)
 
 end
 
+function retrievedims2D(fnc::AbstractString)
+
+    rce = NCDataset(fnc)
+    x = rce["x"][:]
+    t = rce["time"][:]
+
+	if haskey(rce,"y")
+		  isy = true; y = rce["y"][:]
+	else; isy = false
+	end
+
+    close(rce)
+
+	if isy
+    	  return x,y,t
+	else; return x,t
+	end
+
+end
+
 function retrievevar(
     variable::AbstractString,
     experiment::AbstractString, config::AbstractString;
@@ -74,6 +112,30 @@ function retrievevar(
 end
 
 function retrievevar(variable::AbstractString, fnc::AbstractString)
+
+    rce = NCDataset(fnc)
+    var = rce[variable][:]
+    close(rce)
+
+    return var
+
+end
+
+function retrievevar2D(
+    variable::AbstractString,
+    experiment::AbstractString, config::AbstractString;
+    isensemble::Bool=false, member::Integer=0
+)
+
+    rce = NCDataset(out2Dname(experiment,config,isensemble,member))
+    var = rce[variable][:]
+    close(rce)
+
+    return var
+
+end
+
+function retrievevar2D(variable::AbstractString, fnc::AbstractString)
 
     rce = NCDataset(fnc)
     var = rce[variable][:]
