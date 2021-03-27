@@ -41,8 +41,10 @@ function out2Dname(
     else; expname = experiment
     end
 
-	fnclist = glob("RCE_TroPrecLS-$(expname)*.nc",joinpath(experiment,config,"OUT_2D"))
-    fnc = datadir(fnclist[1])
+	fnclist = glob(
+		"RCE_TroPrecLS-$(expname)*.nc",
+		joinpath(datadir(experiment,config,"OUT_2D"))
+	); fnc = datadir(fnclist[1])
 
     return fnc
 
