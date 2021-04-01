@@ -206,10 +206,10 @@ function calccsf(RH,QV,P)
 	swp = zeros(nt)
 
     for it = 1 : nt
-		QVtmp[2:end] .= QV[:,it]
-		QVsat[2:end] .= QV[:,it] ./ RH[:,it]
-        csf[it] = integrate(pvec,reverse(QVtmp)) / integrate(pvec,reverse(QVsat))
-		swp[it] = integrate(pvec,reverse(QVsat)) / 9.81 / 1000
+		QVtmp[2:end] .= reverse(QV[:,it])
+		QVsat[2:end] .= reverse(QV[:,it]) ./ reverse(RH[:,it])
+        csf[it] = integrate(pvec,QVtmp) / integrate(pvec,QVsat)
+		swp[it] = integrate(pvec,QVsat) / 9.81 / 1000
     end
 
 	return csf,swp
