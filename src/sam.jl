@@ -205,7 +205,7 @@ function calccsf(RH,P)
     csf = zeros(nt)
 
     for it = 1 : nt
-    	RHtmp[2:end] .= RH[:,it]
+    	RHtmp[2:end] .= reverse(RH[:,it])
         csf[it] = integrate(pvec,RHtmp) / pint
     end
 
