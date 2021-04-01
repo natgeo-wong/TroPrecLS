@@ -197,19 +197,22 @@ function tair2qsat(T,P)
 
 end
 
-function calccsf(RH,P)
+function calccsf(RH,QV,P)
 
-    pvec = vcat(0,reverse(P)); nt = size(RH,2)
-    pint = integrate(pvec,ones(length(pvec)))
-    RHtmp = zeros(length(pvec))
+	pvec = vcat(0,reverse(P)) * 100; nt = size(RH,2)
+	QVtmp = zeros(length(pvec))
+	QVsat = zeros(length(pvec))
     csf = zeros(nt)
+	swp = zeros(nt)
 
     for it = 1 : nt
-    	RHtmp[2:end] .= reverse(RH[:,it])
-        csf[it] = integrate(pvec,RHtmp) / pint
+		QVtmp[2:end] .= QV[:,it]
+		QVsat[2:end] .= QV[:,it] ./ RH[:,it]
+        csf[it] = integrate(pvec,reverse(QVtmp)) / integrate(pvec,reverse(QVsat))
+		swp[it] = integrate(pvec,reverse(QVsat)) / 9.81 / 1000
     end
 
-    return csf
+	return csf,swp
 
 end
 
