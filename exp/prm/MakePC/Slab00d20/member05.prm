@@ -4,7 +4,7 @@ caseid ='TroPrecLS-MakePC-member05',
 
 dx = 1000.,
 dy = 1000.,
-dt = 60.,
+dt = 30.,
 
 doensemble    = .true.,
 nensemble     = 5,
@@ -61,21 +61,21 @@ doisccp = .false.,
 domodis = .false.,
 domisr  = .false.,
 
-nstop    = 432000,
-nprint   = 1440,
-nstat    = 30,    ! Calculate statistics every hour!
+nstop    = 864000,
+nprint   = 2880,
+nstat    = 60,    ! Calculate statistics every hour!
 nstatfrq = 30,     ! Collect 60 samples per statistical calculation (every 1 minute)
 
 doSAMconditionals     = .false.,
 dosatupdnconditionals = .false.,
 
-nsave2D      = 30,
+nsave2D      = 60,
 nsave2Dstart = 9999999,
 nsave2Dend   = 999999999,
 save2Dbin    = .true.,
 save2Davg    = .true.,
 
-nsave3D      = 60,
+nsave3D      = 120,
 nsave3Dstart = 9999999,
 nsave3Dend   = 999999999,
 save3Dbin    = .true.,
