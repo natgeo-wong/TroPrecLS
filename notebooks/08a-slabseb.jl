@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.20
+# v0.12.21
 
 using Markdown
 using InteractiveUtils
@@ -36,15 +36,26 @@ In this notebook, we perform these calculations, and what we calculate here will
 "
 
 # ╔═╡ 57f52568-5bb9-11eb-1e7f-c34b6efe0bac
-ndy = 100
+ndy = 250; imem = 4;
 
 # ╔═╡ 4f40bd7e-5bb9-11eb-34f2-91e1f959c59a
 begin
-	z,p,t = retrievedims("3SWTGamExp0","damping08d00"); t = t.-80;
-	lw = retrievevar("LWNS","3SWTGamExp0","damping08d00")
-	sw = retrievevar("SWNS","3SWTGamExp0","damping08d00")
-	sh = retrievevar("SHF","3SWTGamExp0","damping08d00")
-	lh = retrievevar("LHF","3SWTGamExp0","damping08d00")
+	z,p,t = retrievedims("WTGamP","damping002",isensemble=true,member=imem)
+	t = t.-80;
+	lw = zeros(length(t));
+	sw = zeros(length(t));
+	sh = zeros(length(t));
+	lh = zeros(length(t));
+	for im = 1 : 5
+		lw[:] += retrievevar("LWNS","WTGamP","damping002",isensemble=true,member=im)
+		sw[:] += retrievevar("SWNS","WTGamP","damping002",isensemble=true,member=im)
+		sh[:] += retrievevar("SHF","WTGamP","damping002",isensemble=true,member=im)
+		lh[:] += retrievevar("LHF","WTGamP","damping002",isensemble=true,member=im)
+	end
+	lw = lw / 5
+	sw = sw / 5
+	sh = sh / 5
+	lh = lh / 5
 md"Loading surface energy balance data from the fixed SST run ..."
 end
 

@@ -222,7 +222,7 @@ Should the difference in the final averaged sounding profile be vastly different
 "
 
 # ╔═╡ 401a6a3a-8444-11eb-3ee8-594591ed5aa9
-nendays = 100
+nendays = 500
 
 # ╔═╡ 7d905176-81e8-11eb-20d3-b9be287472f5
 begin
@@ -233,6 +233,7 @@ begin
 	tem_en = zeros(nz_en,nt_en,nen)
 	qvp_en = zeros(nz_en,nt_en,nen)
 	pre_en = zeros(nz_en,nt_en,nen); plevel = zeros(nz_en,nen)
+	prc_en = zeros(nt_en,nen);
 	for imem = 1 : nen
 		tbi_en[:,:,imem] = retrievevar("TBIAS","Control","$(config)",isensemble=true,member=imem)
 		qbi_en[:,:,imem] = retrievevar("QBIAS","Control","$(config)",isensemble=true,member=imem)
@@ -242,6 +243,7 @@ begin
 		tob_en[:,imem] = retrievevar("TABSOBS","Control","$(config)",isensemble=true,member=imem)[:,end]
 		qob_en[:,imem] = retrievevar("QVOBS","Control","$(config)",isensemble=true,member=imem)[:,end]
 		plevel[:,imem] = retrievevar("p","Control","$(config)",isensemble=true,member=imem)[:,end]
+		prc_en[:,imem] = retrievevar("PREC","Control","$(config)",isensemble=true,member=imem)
 	end
 	
 	tob_en = dropdims(mean(tob_en,dims=2),dims=2)
@@ -262,7 +264,7 @@ md"Calculating difference between `TABS` and `TABSOBS` ..."
 end
 
 # ╔═╡ c658d650-8614-11eb-252c-c3066fb1d506
-ip = plevel .> 70
+ip = plevel .> 25
 
 # ╔═╡ f35ab14c-8226-11eb-29b4-c3b7130f3733
 begin
@@ -286,7 +288,7 @@ begin
 		dropdims(mean(pts_en,dims=2),dims=2),c="k"
 	)
 	aen[1].format(
-		xlim=(-0.15,0.15),xlocator=(-2:2)/10,xlabel=L"T - T$_{OBS}$ / K",
+		xlim=(-0.075,0.075),xlocator=(-2:2)/20,xlabel=L"T - T$_{OBS}$ / K",
 		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",
 		suptitle="Model Ensemble Equilibrium RCE | $config"
 	)
@@ -315,7 +317,7 @@ begin
 		dropdims(mean(pts_en,dims=2),dims=2),c="k"
 	)
 	aen[3].format(
-		xlim=(-4,4),xlocator=(-2:2)*2,
+		xlim=(-1.5,1.5),xlocator=(-2:2),
 		xlabel=L"qr = $\frac{q - q_{OBS}}{q_{OBS}}$ / %",
 		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",
 	)
@@ -340,6 +342,9 @@ begin
 	load("rcetdts-$(config)-ensemble.png")
 	
 end
+
+# ╔═╡ 11913f26-8e7c-11eb-1b37-0f9c8e7b7331
+md"The domain mean precipitation is $(mean(prc_en)) mm/day"
 
 # ╔═╡ 4db59bf0-82ec-11eb-0374-81a982a74216
 md"
@@ -396,6 +401,7 @@ end
 # ╟─c658d650-8614-11eb-252c-c3066fb1d506
 # ╟─f35ab14c-8226-11eb-29b4-c3b7130f3733
 # ╟─a3650e8a-822b-11eb-29ca-cd01b90e8099
+# ╟─11913f26-8e7c-11eb-1b37-0f9c8e7b7331
 # ╟─4db59bf0-82ec-11eb-0374-81a982a74216
 # ╟─549c7744-82ed-11eb-03e8-7bb72c725856
 # ╟─eba0fc7a-82eb-11eb-104e-d17de6c6c0de

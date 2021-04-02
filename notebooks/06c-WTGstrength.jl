@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.20
+# v0.12.21
 
 using Markdown
 using InteractiveUtils
@@ -14,7 +14,6 @@ end
 # ╔═╡ 6dce35fc-5914-11eb-0ce2-0d4e164e1898
 begin
 	@quickactivate "TroPrecLS"
-	using SpecialFunctions
 	using StatsBase
 	
 	using ImageShow, PNGFiles
@@ -30,18 +29,32 @@ end
 md"
 # 6c. Momentum Damping Strength
 
-In this notebook, we investigate and develop a way to implement the WTG forcing gradually in the System of Atmospheric Modelling.  The sudden introduction of WTG large-scale forcing often causes a model to enter a \"shocked\" state that unnaturally forces the model into a different state.  Here, we develop a method that gradually increases the strength of the WTG momentum-damping parameter from a near/pseudo-RCE state.
+From notebook `06b-RCE2WTG.jl`, we see that adding the WTG approximation into a limited-area domain forces the initial RCE state into one or two regimes: a wet regime and a dry regime.  These regimes are analogues to the wet and dry regimes found in a large-area domain, where self-aggregation of convection naturally occurs in RCE.
+
+In this notebook, we explore the characteristics of these wet and dry regimes under different $a_m$ strength.
+"
+
+# ╔═╡ b6892634-9199-11eb-38d5-8dda8da16ed7
+md"
+### A. The Wet and Dry Regimes in WTG Ensemble Runs
+
+We recall the momentum damping equation (assuming $a_m$ is constant with height):
+
+$$\frac{\partial^2\omega'}{\partial p^2} \approx \frac{k^2}{a_m} \frac{R_d}{p}T_v'$$
+
+Recall that $k$ is the wavenumber.  Therefore, increasing $a_m$ increases the wavenumber required for the WTG response to be the same.  Or in other words:
+
+$$k' = \frac{k}{\sqrt{a_m}}$$
+
+The pseudo-wavenumber $k'$ is smaller than the actual wavenumber $k$, which implies that the wavelength is much, much larger.  This is an analogue to the domain being farther away from the baseline RCE domain, which is taken to be a large-scale domain average.  So as $a_m$ increases, we should see the dry and wet states converge back into the initial RCE state.
 "
 
 # ╔═╡ d3b025e0-5b35-11eb-330a-5fbb2204da63
-exp = "3P"
-
-# ╔═╡ bdfa9872-5b35-11eb-059e-ad1ac171d295
-am_wtg = 0
+expi = "P"
 
 # ╔═╡ a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
 begin
-	expname = "$(exp)WTGamExp$(am_wtg)"
+	expname = "WTGam$(expi)"
 	configvec = [
 		"damping001",
 		"damping002",
@@ -51,10 +64,13 @@ begin
 		"damping032",
 		"damping064",
 		"damping128",
+		"damping256",
+		"damping512",
 	]
 	ncon = length(configvec)
 	blues = pplt.Colors("Blues",(ncon+2))
-	reds  = pplt.Colors("Reds",(ncon+2))
+	grns  = pplt.Colors("Teal",(ncon+2))
+	brwns = pplt.Colors("Brown",(ncon+2))
 	lgd = Dict("frame"=>false,"ncols"=>4)
 md"Loading time dimension and defining the damping experiments ..."
 end
@@ -62,7 +78,7 @@ end
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(nrows=2,aspect=3,axwidth=4,hspace=0.2,sharey=0)
+	fts,ats = pplt.subplots(ncols=4,aspect=0.5,axwidth=1.2,sharex=0)
 	
 	for ic in 1 : ncon
 		config = configvec[ic]
@@ -76,65 +92,248 @@ begin
 			if isfile(fnc)
 				_,_,t = retrievedims(fnc); t = t .- 80
 				pr = retrievevar("PREC",fnc)
-				sw = retrievevar("SWNS",fnc); lw = retrievevar("LWNS",fnc)
-				sh = retrievevar("SHF",fnc);  lh = retrievevar("LHF",fnc)
-				seb = sw .- lw .- sh .- lh
-				ats[1].plot(t,pr,lw=1,color=blues[ic+1])
-				if imem == 1
-					ats[2].plot(
-						t,seb,lw=1,color=reds[ic+1],
-						label=(L"$a_m =$" * " $config"),
-						legend="b",legend_kw=lgd
-					)
+				pa = retrievevar("AREAPREC",fnc)
+				pw = retrievevar("PW",fnc)
+				pra = pr./pa; pra[isnan.(pra)] .= 0; pra[pra.==Inf] .= 0
+				ats[1].scatter(mean(pr[(end-99):end]),config,lw=1,color=blues[ic+1])
+				ats[2].scatter(mean(pa[(end-99):end]),config,lw=1,color=blues[ic+1])
+				ats[3].scatter(mean(pra[(end-99):end]),config,lw=1,color=blues[ic+1])
+				ats[4].scatter(mean(pw[(end-99):end]),config,lw=1,color=blues[ic+1])
+			end
+		end
+		
+	end
+	
+	for imem = 1 : 10
+		fnc = outstatname("Control","$(expi)INSOL",false,true,imem)
+		if isfile(fnc)
+			_,_,t = retrievedims(fnc); t = t .- 80
+			pr = retrievevar("PREC",fnc)
+			pa = retrievevar("AREAPREC",fnc)
+			pw = retrievevar("PW",fnc)
+			pra = pr./pa; pra[isnan.(pra)] .= 0; pra[pra.==Inf] .= 0
+			ats[1].plot([1,1]*mean(pr[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[2].plot([1,1]*mean(pa[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[3].plot([1,1]*mean(pra[(end-499):end]),[0,2000],c="grey",lw=1)
+			ats[4].plot([1,1]*mean(pw[(end-499):end]),[0,2000],c="grey",lw=1)
+		end
+	end
+	
+	ats[1].format(
+		ylim=(0.5,2000),ylabel=L"$a_m$ / day$^{-1}$",yscale="log",
+		xscale="symlog",xscale_kw=Dict("linthresh"=>0.1),
+		xlim=(0,200),xlabel=L"Domain $P$ / mm day$^{-1}$",
+		suptitle=L"Sensitivity to $a_m$ | " * "$(expname)",
+	)
+	
+	ats[2].format(
+		xscale="symlog",xscale_kw=Dict("linthresh"=>0.1),
+		xlim=(0,1),xlabel="Rain Area Fraction",
+	)
+	
+	ats[3].format(
+		xscale="symlog",xscale_kw=Dict("linthresh"=>10),
+		xlim=(0,200),xlabel=L"Rain Area $P$ / mm day$^{-1}$",
+	)
+	
+	ats[4].format(
+		xlim=(0,75),xlabel="Precipitable Water / mm",
+	)
+	
+	for ax in ats
+		ax.format(urtitle="Wet",ultitle="Dry")
+	end
+	
+	fts.savefig(plotsdir(
+		"wtgstrength-$(expname).png"),
+		transparent=false,dpi=200
+	)
+	load(plotsdir("wtgstrength-$(expname).png"))
+end
+
+# ╔═╡ 9cf4fa56-91a8-11eb-2710-955eefd10142
+md"
+We see the following:
+* As $a_m$ increases, both the wet and dry model regimes converge back into the initial RCE state.
+* When $a_m$ becomes too small, all model states collapse into a dry regime.
+* As $a_m$ decreases, the change in rain-area fraction in the domain, rather than rain-rate in the rain-area, which is responsible for changes in the domain-averaged precipitation.
+
+In conclusion, the overall transition from RCE to WTG forcing (decreasing $a_m$) is as follows:
+1. Domain becomes more moist / heavier precipitation / wetter
+2. Eventually, a dry regime separates out
+3. Wet regime begins to show drier characteristics
+4. Eventually, wet regime crosses a threshold and model fully enters into a dry-regime.
+
+We note that the simulations that end up in the wet regime are more numerous than those that end up in the dry regime.  Overall, assuming complete randomness this seems to indicate that the a wet regime is favoured.
+
+I have decided on using precipitable water as the prognostic variable for determining if the model is in a dry or wet regime.
+"
+
+# ╔═╡ 364a1ce8-91ba-11eb-29a8-b948110e6125
+md"
+### B. Exploring some Variables
+"
+
+# ╔═╡ 489b5bea-91b4-11eb-358b-3fe61c900511
+begin
+	pplt.close()
+	feb,aeb = pplt.subplots(ncols=5,aspect=0.5,axwidth=1.2,sharex=0); pw = zeros(10)
+	
+	for imem = 1 : 10
+		fnc = outstatname("Control","$(expi)INSOL",false,true,imem)
+		if isfile(fnc)
+			_,_,t = retrievedims(fnc); t = t .- 80
+			sw = retrievevar("SWNS",fnc)
+			lw = -retrievevar("LWNS",fnc)
+			sh = -retrievevar("SHF",fnc)
+			lh = -retrievevar("LHF",fnc)
+			sb = sw .+ lw .+ sh .+ lh
+			pw[imem] = mean(retrievevar("PW",fnc)[(end-499):end])
+			aeb[1].plot([1,1]*mean(sw[(end-499):end]),[0,2000],c="grey",lw=1)
+			aeb[2].plot([1,1]*mean(lw[(end-499):end]),[0,2000],c="grey",lw=1)
+			aeb[3].plot([1,1]*mean(sh[(end-499):end]),[0,2000],c="grey",lw=1)
+			aeb[4].plot([1,1]*mean(lh[(end-499):end]),[0,2000],c="grey",lw=1)
+			aeb[5].plot([1,1]*mean(sb[(end-499):end]),[0,2000],c="grey",lw=1)
+		end
+	end
+	
+	pw = mean(pw)
+	
+	for ic in 1 : ncon
+		icon = configvec[ic]
+		icon = replace(icon,"damping"=>"")
+		icon = replace(icon,"d"=>".")
+		icon = parse(Float64,icon)
+		imem = 0
+		
+		while imem < 100; imem += 1
+			fnc = outstatname(expname,configvec[ic],false,true,imem)
+			if isfile(fnc)
+				_,_,t = retrievedims(fnc); t = t .- 80
+				sw = retrievevar("SWNS",fnc)
+				lw = -retrievevar("LWNS",fnc)
+				sh = -retrievevar("SHF",fnc)
+				lh = -retrievevar("LHF",fnc)
+				sb = sw .+ lw .+ sh .+ lh
+				pwi = mean(retrievevar("PW",fnc)[(end-99):end])
+				if pwi < pw
+					aeb[1].scatter(mean(sw[(end-99):end]),icon,lw=1,color=brwns[ic+1])
+					aeb[2].scatter(mean(lw[(end-99):end]),icon,lw=1,color=brwns[ic+1])
+					aeb[3].scatter(mean(sh[(end-99):end]),icon,lw=1,color=brwns[ic+1])
+					aeb[4].scatter(mean(lh[(end-99):end]),icon,lw=1,color=brwns[ic+1])
+					aeb[5].scatter(mean(sb[(end-99):end]),icon,lw=1,color=brwns[ic+1])
 				else
-					ats[2].plot(t,seb,lw=1,color=reds[ic+1])
+					aeb[1].scatter(mean(sw[(end-99):end]),icon,lw=1,color=grns[ic+1])
+					aeb[2].scatter(mean(lw[(end-99):end]),icon,lw=1,color=grns[ic+1])
+					aeb[3].scatter(mean(sh[(end-99):end]),icon,lw=1,color=grns[ic+1])
+					aeb[4].scatter(mean(lh[(end-99):end]),icon,lw=1,color=grns[ic+1])
+					aeb[5].scatter(mean(sb[(end-99):end]),icon,lw=1,color=grns[ic+1])
 				end
 			end
 		end
 		
 	end
 	
-	for imem = 1 : 5
-		fnc = outstatname(expname,"dampingInf",false,true,imem)
-		if isfile(fnc)
-			_,_,t = retrievedims(fnc); t = t .- 80
-			pr = retrievevar("PREC",fnc)
-			sw = retrievevar("SWNS",fnc); lw = retrievevar("LWNS",fnc)
-			sh = retrievevar("SHF",fnc);  lh = retrievevar("LHF",fnc)
-			seb = sw .- lw .- sh .- lh
-			ats[1].plot(t,pr,lw=1,color="k")
-			if imem == 1
-				ats[2].plot(t,seb,lw=1,color="k",label="RCE",legend="b")
-			else
-				ats[2].plot(t,seb,lw=1,color="k")
+	aeb[1].format(
+		ylim=(0.5,2000),ylabel=L"$a_m$ / day$^{-1}$",yscale="log",
+		xlim=(0,400),xlabel="Net Shortwave",
+		suptitle=L"Energy Balance / W m$^{-2}$ | " * "$(expname)",
+	)
+	
+	aeb[2].format(xlim=(-150,0),xlabel="Net Longwave",)
+	aeb[3].format(xlim=(-75,0),xlabel="Sensible Heat",)
+	aeb[4].format(xlim=(-300,0),xlabel="Latent Heat",)
+	aeb[5].format(xlim=(-350,350),xlabel="Surface Balance",)
+	
+	feb.savefig(plotsdir(
+		"wtgstrength-$(expname)-seb.png"),
+		transparent=false,dpi=200
+	)
+	load(plotsdir("wtgstrength-$(expname)-seb.png"))
+end
+
+# ╔═╡ e967eb5c-91c4-11eb-3066-05ccaa40bd11
+begin
+	pplt.close()
+	f3D,a3D = pplt.subplots(ncols=4,aspect=0.5,axwidth=1.2,sharex=0)
+	clc = zeros(64)
+	tab = zeros(64)
+	
+	for ic in 1 : ncon
+		icon = configvec[ic]
+		icon = replace(icon,"damping"=>"")
+		icon = replace(icon,"d"=>".")
+		icon = parse(Float64,icon)
+		imem = 0
+		
+		while imem < 100; imem += 1
+			fnc = outstatname(expname,configvec[ic],false,true,imem)
+			if isfile(fnc)
+				_,p,t = retrievedims(fnc); t = t .- 80
+				clci = mean(retrievevar("CLD",fnc)[:,(end-99):end],dims=2)*100
+				tabi = mean(retrievevar("TABS",fnc)[:,(end-99):end],dims=2)
+				qvi  = mean(retrievevar("QV",fnc)[:,(end-99):end],dims=2) / 10
+				rhi  = calcrh(qvi,tabi,p)
+				wwtg = mean(retrievevar("WWTG",fnc)[:,(end-99):end],dims=2) * 3.6
+				pwi = mean(retrievevar("PW",fnc)[(end-99):end])
+				if pwi < pw
+					a3D[1].plot(dropdims(clci,dims=2),p,lw=1,c=brwns[ic+1])
+					a3D[2].plot(dropdims(tabi,dims=2),p,lw=1,c=brwns[ic+1])
+					a3D[3].plot(dropdims(wwtg,dims=2),p,lw=1,c=brwns[ic+1])
+					a3D[4].plot(dropdims(rhi,dims=2),p,lw=1,c=brwns[ic+1])
+				else
+					a3D[1].plot(dropdims(clci,dims=2),p,lw=1,c=grns[ic+1])
+					a3D[2].plot(dropdims(tabi,dims=2),p,lw=1,c=grns[ic+1])
+					a3D[3].plot(dropdims(wwtg,dims=2),p,lw=1,c=grns[ic+1])
+					a3D[4].plot(dropdims(rhi,dims=2),p,lw=1,c=grns[ic+1])
+				end
 			end
+		end
+		
+	end
+	
+	for imem = 1 : 10
+		fnc = outstatname("Control","$(expi)INSOL",false,true,imem)
+		if isfile(fnc)
+			_,p,_ = retrievedims(fnc);
+			clc[:] = mean(retrievevar("CLD",fnc)[:,(end-499):end],dims=2) * 100
+			tab[:] = mean(retrievevar("TABS",fnc)[:,(end-499):end],dims=2)
+			qv = mean(retrievevar("QV",fnc)[:,(end-99):end],dims=2) / 10
+			rh = calcrh(qv,tab,p)
+			a3D[1].plot(clc,p,color="k")
+			a3D[2].plot(tab,p,color="k")
+			a3D[4].plot(dropdims(rh,dims=2),p,color="k")
 		end
 	end
 	
-	ats[1].format(
-		xlim=(0,400),xlabel="Time / Days",
-		ylim=(0.01,200),ylabel=L"Rainfall Rate / mm day$^{-1}$",yscale="log",
-		suptitle=expname
+	a3D[1].format(
+		ylim=(1000,20),ylabel="Pressure / hPa",yscale="log",
+		xlim=(0,100),xlabel="Cloud Fraction / %",
+		suptitle="3D Vertical Profiles | $(expname)",
 	)
 	
-	ats[2].format(
-		xlim=(0,400),xlabel="Time / Days",
-		ylim=(-350,350),ylabel=L"SEB / W m$^{-2}$",ylocator=(-3:3)*100,
-		suptitle=expname
-	)
+	a3D[2].format(xlim=(150,325),xlabel="Temperature / K",)
+	a3D[3].format(xlim=(-2,2),xlabel=L"$w_{WTG}$ / km hr$^{-1}$",xscale="symlog",
+	xscale_kw=Dict("linthresh"=>0.1),)
+	a3D[4].format(xlim=(0,110),xlabel="Relative Humidity / %",)
+	# a3D[5].format(xlim=(-350,350),xlabel="Surface Balance",)
 	
-	fts.savefig(plotsdir(
-		"rce2wtg-$(expname).png"),
+	f3D.savefig(plotsdir(
+		"wtgstrength-$(expname)-3D.png"),
 		transparent=false,dpi=200
 	)
-	load(plotsdir("rce2wtg-$(expname).png"))
+	load(plotsdir("wtgstrength-$(expname)-3D.png"))
 end
 
 # ╔═╡ Cell order:
 # ╟─e78a75c2-590f-11eb-1144-9127b0309135
 # ╟─681658b0-5914-11eb-0d65-bbace277d145
 # ╟─6dce35fc-5914-11eb-0ce2-0d4e164e1898
+# ╟─b6892634-9199-11eb-38d5-8dda8da16ed7
 # ╠═d3b025e0-5b35-11eb-330a-5fbb2204da63
-# ╠═bdfa9872-5b35-11eb-059e-ad1ac171d295
 # ╟─a63de98c-5b35-11eb-0a8f-b7a1ebd441b6
-# ╠═55230f4a-7661-11eb-1c37-8b022b95e08e
+# ╟─55230f4a-7661-11eb-1c37-8b022b95e08e
+# ╟─9cf4fa56-91a8-11eb-2710-955eefd10142
+# ╟─364a1ce8-91ba-11eb-29a8-b948110e6125
+# ╟─489b5bea-91b4-11eb-358b-3fe61c900511
+# ╟─e967eb5c-91c4-11eb-3066-05ccaa40bd11

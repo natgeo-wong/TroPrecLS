@@ -20,6 +20,7 @@ begin
 	using NumericalIntegration
 	using Printf
 	using Statistics
+	using StatsBase
 	
 	using ImageShow, PNGFiles
 	using PyCall, LaTeXStrings
@@ -108,25 +109,90 @@ md"
 Relative humidity in SAM is plotted against the liquid saturation point.  However, we are able to calculate relative humidity using the ice-saturation point for air temperatures below 0ºC, using specific humidity and atmospheric temperature data.
 "
 
+# ╔═╡ 6b0b697c-5117-11eb-1c0f-13c2840a65d2
+function tair2qsat(T,P)
+
+	tb = T - 273.15
+	if tb <= 0
+		esat = exp(43.494 - 6545.8/(tb+278)) / (tb+868)^2
+	else
+		esat = exp(34.494 - 4924.99/(tb+237.1)) / (tb+105)^1.57
+	end
+
+
+	r = 0.622 * esat / max(esat,P-esat)
+	return r / (1+r)
+
+end
+
+# ╔═╡ 48f8e67e-5116-11eb-0037-3b6630655917
+function calcrh(QV,TAIR,P)
+
+	RH = zeros(size(QV)); np = size(RH,1); nt = size(RH,2)
+
+	for it = 1 : nt, ip = 1 : np
+		RH[ip,it] = QV[ip,it] / tair2qsat(TAIR[ip,it],P[ip]*100)
+	end
+
+	return RH
+
+end
+
 # ╔═╡ a8331f82-5117-11eb-158b-b3073e67affd
 md"
 From the relative humidity that we calculate, we then can calculate column saturation fraction `CSF`, or the overall relative humidity of the column
 "
 
 # ╔═╡ dacb2ffe-5117-11eb-33bf-ff68ff8c6504
-function calccsf(RH,P)
+function calccsf(RH,QV,P)
 	
-	pvec = vcat(0,reverse(P)); nt = size(RH,2)
-	pint = integrate(pvec,ones(length(pvec)))
-	RHtmp = zeros(length(pvec))
+	pvec = vcat(0,reverse(P)) * 100; nt = size(RH,2)
+	QVtmp = zeros(length(pvec))
+	QVsat = zeros(length(pvec))
     csf = zeros(nt)
+	swp = zeros(nt)
 	
     for it = 1 : nt
-		RHtmp[2:end] .= RH[:,it]
-        csf[it] = integrate(pvec,RHtmp) / pint
+		QVtmp[2:end] .= QV[:,it]
+		QVsat[2:end] .= QV[:,it] ./ RH[:,it]
+        csf[it] = integrate(pvec,reverse(QVtmp)) / integrate(pvec,reverse(QVsat))
+		swp[it] = integrate(pvec,reverse(QVsat)) / 9.81/1000
     end
 	
-	return csf
+	return csf,swp
+	
+end
+
+# ╔═╡ 5dc0fdf6-9326-11eb-1009-db847dddab8e
+function calccsf2(RH,P)
+
+    pvec = vcat(0,reverse(P)); nt = size(RH,2)
+    pint = integrate(pvec,ones(length(pvec)))
+    RHtmp = zeros(length(pvec))
+    csf = zeros(nt)
+
+    for it = 1 : nt
+    	RHtmp[2:end] .= reverse(RH[:,it])
+        csf[it] = integrate(pvec,RHtmp) / pint
+    end
+
+    return csf
+
+end
+
+# ╔═╡ f188474a-9319-11eb-1bc9-7754318339b1
+function calcpw(QV,P)
+	
+	pvec = vcat(0,reverse(P)); nt = size(QV,2)
+	QVtmp = zeros(length(pvec))
+    pw = zeros(nt)
+	
+    for it = 1 : nt
+		QVtmp[2:end] .= QV[:,it]
+        pw[it] = integrate(pvec*100,reverse(QVtmp)) / 9.81/1000
+    end
+	
+	return pw
 	
 end
 
@@ -243,8 +309,10 @@ md"
 
 # ╔═╡ 5ffd515e-5128-11eb-3b11-815af069d22f
 begin
-	exp = "Control"; config = "DLARGE"
-	istst = true; mbr = 08;
+	# exp = "MakePC"; config = "Forcing0000-Slab10d00"; istst = false;
+	expi = "DiAmp064km"; config = "Slab05d0"; istst = false;
+	# exp = "DiAmp064km"; config = "Slab31d6"; istst = true;
+	isen = false; mbr=10
 end
 
 # ╔═╡ f440d5ca-5128-11eb-2574-d58f2f7d8fc3
@@ -253,36 +321,86 @@ begin
 	pplt.close(); fts,axsts = pplt.subplots(nrows=3,aspect=3,axwidth=4)
 	
 	lvls = [
-		-50,-31.6,-20,-14.1,-10,-7.07,
-		-5,-3.16,-2,-1.41,-1,-0.5,
-		0.5,1,1.41,2,3.16,
-		5,
-		7.07,10,14.1,20,31.6,50
+		-100,-70.7,-50,-31.6,-20,-14.1,-10,-7.07,
+		-5,5,
+		7.07,10,14.1,20,31.6,50,70.7,100
 	]/10
 	
-	z,p,t = retrievedims(exp,config,istest=istst,isensemble=true,member=mbr)
-	var2D = retrievevar("AREAPREC",exp,config,istest=istst,isensemble=true,member=mbr)
-	var2A = retrievevar("PREC",exp,config,istest=istst,isensemble=true,member=mbr)
-	var3T = retrievevar("TBIAS",exp,config,istest=istst,isensemble=true,member=mbr)
-	var3Q = retrievevar("QBIAS",exp,config,istest=istst,isensemble=true,member=mbr)
-	varob = retrievevar("QVOBS",exp,config,istest=istst,isensemble=true,member=mbr)
+	z,p,t = retrievedims(expi,config,istest=istst,isensemble=isen,member=mbr)
+	nt = length(t)
+	# var2D = retrievevar("AREAPREC",exp,config,istest=istst,isensemble=isen,member=mbr)
+	var2A = retrievevar("SST",expi,config,istest=istst,isensemble=isen,member=mbr)
+	var3T = retrievevar("CLD",expi,config,istest=istst,isensemble=isen,member=mbr)
+	var3Q = retrievevar("QBIAS",expi,config,istest=istst,isensemble=isen,member=mbr)
+	varob = retrievevar("QVOBS",expi,config,istest=istst,isensemble=isen,member=mbr)
+	varTA = retrievevar("TABS",expi,config,istest=istst,isensemble=isen,member=mbr)
+	varQV = retrievevar("QV",expi,config,istest=istst,isensemble=isen,member=mbr)/1000
+	varPW = retrievevar("PW",expi,config,istest=istst,isensemble=isen,member=mbr)
+	varrh = retrievevar("RELH",expi,config,istest=istst,isensemble=isen,member=mbr)
+	
+	rh  = calcrh(varQV,varTA,p)
+	csf,swp = calccsf(rh,varQV,p)
+	csf2 = calccsf2(rh,p)
+	pw  = calcpw(varQV,p)
+	# csfa = calccsf(varrh,p)
+	
+# 	pbin = 0:10:250
+# 	test = fit(Histogram,(mod.(t,1)*24,var2A),(0:24,pbin)).weights
+	
+# 	nt = length(t); nhr = 24; np = length(pbin) - 1
+# 	test = test/nt*np*nhr
+# 	test = vcat(test,test)
+# 	test[iszero.(test)] .= NaN
 	
 	plot3Dtimeseries(
-		axsts,1,t.-80,p,var3T,
-		dbeg=0,dend=100,lvl=lvls,cmapname="RdBu_r"
+		axsts,1,t.-80,p,
+		var3T,
+		dbeg=0,dend=300,lvl=lvls/10,cmapname="RdBu_r"
 	)
 	plot3Dtimeseries(
-		axsts,2,t.-80,p,var3Q./varob*100,
-		dbeg=0,dend=100,lvl=lvls*10,cmapname="drywet"
+		axsts,2,t.-80,p,
+		var3Q./varob .-1,
+		dbeg=0,dend=300,lvl=lvls,cmapname="RdBu_r"
 	)
+	# plot3Dtimeseries(
+	# 	axsts,1,t.-80,p,varob,
+	# 	dbeg=250,dend=300,lvl=0:10:100,cmapname="drywet"
+	# )
 	# plot2Dtimeseries(
 	# 	axsts,1,t.-80,var2A,
-	# 	dbeg=0,dend=100
+	# 	dbeg=0,dend=300
+	# )
+	# plot2Dtimeseries(
+	# 	axsts,3,t.-80,swp*1000,
+	# 	dbeg=250,dend=300
 	# )
 	plot2Dtimeseries(
-		axsts,3,t.-80,var2A,
-		dbeg=700,dend=800
+		axsts,3,t.-80,csf*100,
+		dbeg=250,dend=300
 	)
+	plot2Dtimeseries(
+		axsts,3,t.-80,csf2*100,
+		dbeg=250,dend=300
+	)
+	# plot2Dtimeseries(
+	# 	axsts,3,t.-80,varPW,
+	# 	dbeg=250,dend=300
+	# )
+	# plot2Dtimeseries(
+	# 	axsts,3,t.-80,csfa,
+	# 	dbeg=250,dend=300
+	# )
+	# c = axsts[1].pcolormesh(
+	# 	-24:24,0:10:250,test',cmap="Blues",cmap_kw=Dict("left"=>0.05),
+	# 	levels=10. .^(-1:0.2:1),extend="both"
+	# )
+	# axsts[1].colorbar(c,loc="r")
+	# axsts[1].format(xlim=(-12,12),xlocator=-12:6:12)
+	# axsts[1].scatter(mod.(t,1),var2A)
+	# plot2Dtimeseries(
+	# 	axsts,3,1:50,pr2,
+	# 	dbeg=0,dend=200
+	# )
 	# plot2Dtimeseries(
 	# 	axsts,3,t2.-80,var2D2,
 	# 	dbeg=0,dend=100
@@ -292,56 +410,34 @@ begin
 	# 	dbeg=0,dend=100
 	# )
 	
-	axsts[1].format(yscale="log")
-	axsts[2].format(yscale="log")
-	axsts[3].format(ylim=(0,5))
+	axsts[1].format(ylim=(1000,20),yscale="log")
+	axsts[2].format(ylim=(1000,20),yscale="log")
+	axsts[3].format(ylim=(70,100))
+	# axsts[1].format(xlim=(-12,12),xlocator=-24:3:24)
 	
 	fts.savefig("plots.png",transparent=false,dpi=200)
 	load("plots.png")
 	
 end
 
-# ╔═╡ 6b0b697c-5117-11eb-1c0f-13c2840a65d2
-function tair2qsat(T,P)
-
-	tb = T - 273.15
-	if tb <= 0
-		esat = exp(43.494 - 6545.8/(tb+278)) / (tb+868)^2
-	else
-		esat = exp(34.494 - 4924.99/(tb+237.1)) / (tb+105)^1.57
-	end
-
-
-	r = 0.622 * esat / max(esat,p-esat)
-	return r / (1+r)
-
-end
-
-# ╔═╡ 48f8e67e-5116-11eb-0037-3b6630655917
-function calcrh(QV,TAIR,P)
-
-	RH = zeros(size(RH)); np = size(RH,1); nt = size(RH,2)
-
-	for it = 1 : nt, ip = 1 : np
-		RH[ip,it] = QV[ip,it] / tair2qsat(TAIR[ip,it],p[ip]*100)
-	end
-
-	return RH
-
-end
+# ╔═╡ eb323e5e-92a2-11eb-3596-4ff64f0cea13
+mean(csf)
 
 # ╔═╡ 8676ab94-81ef-11eb-2f9f-7716d1507bc2
 md"
 ### 4. New things ...
 "
 
-# ╔═╡ 3acaf7e6-836f-11eb-34ca-976f461c133c
+# ╔═╡ 3a4f1fe4-92a2-11eb-07c6-fdd645db4f3c
+mod.(t,1)*24
 
+# ╔═╡ 3530faa4-931b-11eb-3120-5d25e45d493c
+p
 
 # ╔═╡ Cell order:
 # ╟─addc35d6-50b3-11eb-02dc-452ced2a45ef
 # ╟─8102297a-50b7-11eb-0430-f79371a66174
-# ╠═9340fa4e-50b4-11eb-253e-ab01deb80456
+# ╟─9340fa4e-50b4-11eb-253e-ab01deb80456
 # ╟─19174960-50cf-11eb-12a3-cf977e483262
 # ╠═e4b19fb2-74bf-11eb-162e-2f42a9e40fea
 # ╠═c1489ae0-5114-11eb-3a56-5b75d263ae63
@@ -351,6 +447,8 @@ md"
 # ╠═6b0b697c-5117-11eb-1c0f-13c2840a65d2
 # ╟─a8331f82-5117-11eb-158b-b3073e67affd
 # ╠═dacb2ffe-5117-11eb-33bf-ff68ff8c6504
+# ╠═5dc0fdf6-9326-11eb-1009-db847dddab8e
+# ╠═f188474a-9319-11eb-1bc9-7754318339b1
 # ╟─2fb20134-5119-11eb-1d07-db7f8c326dda
 # ╠═4324677a-5119-11eb-24f1-8d80c5a15ceb
 # ╠═e006175a-5119-11eb-02ba-b50a41b540cb
@@ -364,5 +462,7 @@ md"
 # ╟─504cbace-5128-11eb-1d27-879bffb48098
 # ╠═5ffd515e-5128-11eb-3b11-815af069d22f
 # ╠═f440d5ca-5128-11eb-2574-d58f2f7d8fc3
+# ╠═eb323e5e-92a2-11eb-3596-4ff64f0cea13
 # ╟─8676ab94-81ef-11eb-2f9f-7716d1507bc2
-# ╠═3acaf7e6-836f-11eb-34ca-976f461c133c
+# ╠═3a4f1fe4-92a2-11eb-07c6-fdd645db4f3c
+# ╠═3530faa4-931b-11eb-3120-5d25e45d493c
