@@ -1,13 +1,13 @@
 &PARAMETERS
 
-caseid ='TroPrecLS-DiAmp064km-member1',
+caseid ='TroPrecLS-DiAmp064km-member5',
 
 dx = 1000.,
 dy = 1000.,
 dt = 30.,
 
 doensemble    = .true.,
-nensemble     = 1,
+nensemble     = 5,
 nrestart      = 0,
 nrestart_skip = 239,
 perturb_type  = 0,
