@@ -43,7 +43,7 @@ day0       = 80.5,
 tabs_s     = 301.70,
 Szero      = 0,
 
-depth_slab_ocean = 0.707,
+depth_slab_ocean = 0.050,
 
 nrad = 12,
 
