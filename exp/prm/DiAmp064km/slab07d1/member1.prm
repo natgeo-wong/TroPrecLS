@@ -1,6 +1,6 @@
 &PARAMETERS
 
-caseid ='TroPrecLS-DiAmp064km-member1',
+caseid ='TroPrecLS-DiAmp064km-member01',
 
 dx = 1000.,
 dy = 1000.,
