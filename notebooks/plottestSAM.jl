@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.21
+# v0.14.2
 
 using Markdown
 using InteractiveUtils
@@ -51,7 +51,7 @@ function outstatname(
 )
 
 	if isensemble
-		  expname = "$(experiment)-member$(@sprintf("%02d",member))"
+		  expname = "$(experiment)-member$(@sprintf("%d",member))"
 	else; expname = experiment
 	end
 
@@ -310,9 +310,9 @@ md"
 # ╔═╡ 5ffd515e-5128-11eb-3b11-815af069d22f
 begin
 	# exp = "MakePC"; config = "Forcing0000-Slab10d00"; istst = false;
-	expi = "DiAmp064km"; config = "Slab05d0"; istst = false;
+	expi = "DiAmp064km"; config = "Slab00d05"; istst = false;
 	# exp = "DiAmp064km"; config = "Slab31d6"; istst = true;
-	isen = false; mbr=10
+	isen = true; mbr=5
 end
 
 # ╔═╡ f440d5ca-5128-11eb-2574-d58f2f7d8fc3
@@ -375,12 +375,8 @@ begin
 	# 	dbeg=250,dend=300
 	# )
 	plot2Dtimeseries(
-		axsts,3,t.-80,csf*100,
-		dbeg=250,dend=300
-	)
-	plot2Dtimeseries(
-		axsts,3,t.-80,csf2*100,
-		dbeg=250,dend=300
+		axsts,3,t.-80,var2A,
+		dbeg=200,dend=300
 	)
 	# plot2Dtimeseries(
 	# 	axsts,3,t.-80,varPW,
@@ -412,7 +408,7 @@ begin
 	
 	axsts[1].format(ylim=(1000,20),yscale="log")
 	axsts[2].format(ylim=(1000,20),yscale="log")
-	axsts[3].format(ylim=(70,100))
+	axsts[3].format(ylim=(290,320))
 	# axsts[1].format(xlim=(-12,12),xlocator=-24:3:24)
 	
 	fts.savefig("plots.png",transparent=false,dpi=200)

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.21
+# v0.14.0
 
 using Markdown
 using InteractiveUtils
@@ -91,7 +91,7 @@ begin
 			fnc = outstatname(expname,configvec[ic],false,true,imem)
 			if isfile(fnc)
 				_,_,t = retrievedims(fnc); t = t .- 80
-				pr = retrievevar("PREC",fnc)
+				pr = retrievevar("PREC",fnc)./24
 				pa = retrievevar("AREAPREC",fnc)
 				pw = retrievevar("PW",fnc)
 				pra = pr./pa; pra[isnan.(pra)] .= 0; pra[pra.==Inf] .= 0
@@ -108,7 +108,7 @@ begin
 		fnc = outstatname("Control","$(expi)INSOL",false,true,imem)
 		if isfile(fnc)
 			_,_,t = retrievedims(fnc); t = t .- 80
-			pr = retrievevar("PREC",fnc)
+			pr = retrievevar("PREC",fnc)./24
 			pa = retrievevar("AREAPREC",fnc)
 			pw = retrievevar("PW",fnc)
 			pra = pr./pa; pra[isnan.(pra)] .= 0; pra[pra.==Inf] .= 0
@@ -122,26 +122,30 @@ begin
 	ats[1].format(
 		ylim=(0.5,2000),ylabel=L"$a_m$ / day$^{-1}$",yscale="log",
 		xscale="symlog",xscale_kw=Dict("linthresh"=>0.1),
-		xlim=(0,200),xlabel=L"Domain $P$ / mm day$^{-1}$",
+		xlim=(0,10),xlabel=L"Domain $P$ / mm hr$^{-1}$",
 		suptitle=L"Sensitivity to $a_m$ | " * "$(expname)",
+		ultitle="(a)"
 	)
 	
 	ats[2].format(
 		xscale="symlog",xscale_kw=Dict("linthresh"=>0.1),
 		xlim=(0,1),xlabel="Rain Area Fraction",
+		ultitle="(b)"
 	)
 	
 	ats[3].format(
-		xscale="symlog",xscale_kw=Dict("linthresh"=>10),
-		xlim=(0,200),xlabel=L"Rain Area $P$ / mm day$^{-1}$",
+		xscale="symlog",xscale_kw=Dict("linthresh"=>1),
+		xlim=(0,10),xlabel=L"Rain Area $P$ / mm hr$^{-1}$",
+		ultitle="(c)"
 	)
 	
 	ats[4].format(
-		xlim=(0,75),xlabel="Precipitable Water / mm",
+		xlim=(0,75),xlabel="PWV / mm",
+		ultitle="(d)"
 	)
 	
 	for ax in ats
-		ax.format(urtitle="Wet",ultitle="Dry")
+		ax.format(lrtitle="Wet",lltitle="Dry")
 	end
 	
 	fts.savefig(plotsdir(
@@ -238,12 +242,13 @@ begin
 		ylim=(0.5,2000),ylabel=L"$a_m$ / day$^{-1}$",yscale="log",
 		xlim=(0,400),xlabel="Net Shortwave",
 		suptitle=L"Energy Balance / W m$^{-2}$ | " * "$(expname)",
+		ultitle="(a)"
 	)
 	
-	aeb[2].format(xlim=(-150,0),xlabel="Net Longwave",)
-	aeb[3].format(xlim=(-75,0),xlabel="Sensible Heat",)
-	aeb[4].format(xlim=(-300,0),xlabel="Latent Heat",)
-	aeb[5].format(xlim=(-350,350),xlabel="Surface Balance",)
+	aeb[2].format(xlim=(-150,0),xlabel="Net Longwave",ultitle="(b)")
+	aeb[3].format(xlim=(-75,0),xlabel="Sensible Heat",ultitle="(c)")
+	aeb[4].format(xlim=(-300,0),xlabel="Latent Heat",ultitle="(d)")
+	aeb[5].format(xlim=(-350,350),xlabel="Surface Balance",ultitle="(e)")
 	
 	feb.savefig(plotsdir(
 		"wtgstrength-$(expname)-seb.png"),
@@ -275,17 +280,20 @@ begin
 				qvi  = mean(retrievevar("QV",fnc)[:,(end-99):end],dims=2) / 10
 				rhi  = calcrh(qvi,tabi,p)
 				wwtg = mean(retrievevar("WWTG",fnc)[:,(end-99):end],dims=2) * 3.6
-				pwi = mean(retrievevar("PW",fnc)[(end-99):end])
+				pwi  = mean(retrievevar("PW",fnc)[(end-99):end])
+				relh = mean(retrievevar("RELH",fnc)[:,(end-99):end],dims=2)
 				if pwi < pw
 					a3D[1].plot(dropdims(clci,dims=2),p,lw=1,c=brwns[ic+1])
 					a3D[2].plot(dropdims(tabi,dims=2),p,lw=1,c=brwns[ic+1])
 					a3D[3].plot(dropdims(wwtg,dims=2),p,lw=1,c=brwns[ic+1])
 					a3D[4].plot(dropdims(rhi,dims=2),p,lw=1,c=brwns[ic+1])
+					# a3D[4].plot(dropdims(relh,dims=2),p,lw=1,c=brwns[ic+1])
 				else
 					a3D[1].plot(dropdims(clci,dims=2),p,lw=1,c=grns[ic+1])
 					a3D[2].plot(dropdims(tabi,dims=2),p,lw=1,c=grns[ic+1])
 					a3D[3].plot(dropdims(wwtg,dims=2),p,lw=1,c=grns[ic+1])
 					a3D[4].plot(dropdims(rhi,dims=2),p,lw=1,c=grns[ic+1])
+					# a3D[4].plot(dropdims(relh,dims=2),p,lw=1,c=grns[ic+1])
 				end
 			end
 		end
@@ -309,13 +317,13 @@ begin
 	a3D[1].format(
 		ylim=(1000,20),ylabel="Pressure / hPa",yscale="log",
 		xlim=(0,100),xlabel="Cloud Fraction / %",
-		suptitle="3D Vertical Profiles | $(expname)",
+		suptitle="3D Vertical Profiles | $(expname)",ultitle="(a)"
 	)
 	
-	a3D[2].format(xlim=(150,325),xlabel="Temperature / K",)
+	a3D[2].format(xlim=(150,325),xlabel="Temperature / K",ultitle="(b)")
 	a3D[3].format(xlim=(-2,2),xlabel=L"$w_{WTG}$ / km hr$^{-1}$",xscale="symlog",
-	xscale_kw=Dict("linthresh"=>0.1),)
-	a3D[4].format(xlim=(0,110),xlabel="Relative Humidity / %",)
+	xscale_kw=Dict("linthresh"=>0.1),ultitle="(c)")
+	a3D[4].format(xlim=(0,110),xlabel="Relative Humidity / %",ultitle="(d)")
 	# a3D[5].format(xlim=(-350,350),xlabel="Surface Balance",)
 	
 	f3D.savefig(plotsdir(

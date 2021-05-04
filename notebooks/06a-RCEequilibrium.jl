@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.21
+# v0.14.0
 
 using Markdown
 using InteractiveUtils
@@ -182,8 +182,8 @@ begin
 	
 	ats[2].colorbar(ct,loc="r",width=0.2)
 	ats[4].colorbar(cq,loc="r",width=0.2)
-	fts.savefig("rcetdts-$(config).png",transparent=false,dpi=200)
-	load("rcetdts-$(config).png")
+	fts.savefig(plotsdir("rcetdts-$(config).png"),transparent=false,dpi=200)
+	load(plotsdir("rcetdts-$(config).png"))
 	
 end
 
@@ -290,7 +290,7 @@ begin
 	aen[1].format(
 		xlim=(-0.075,0.075),xlocator=(-2:2)/20,xlabel=L"T - T$_{OBS}$ / K",
 		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",
-		suptitle="Model Ensemble Equilibrium RCE | $config"
+		suptitle="Model Ensemble Equilibrium RCE | $config",ultitle="(a)"
 	)
 	
 	cten = aen[2].contourf(
@@ -305,7 +305,7 @@ begin
 		xlim=(0,nt_en),
 		ylim=(1010,25),yscale="log",
 		ylabel="Pressure / hPa",
-		urtitle=L"T$_{RMS}$" * " = $(trms_en) K"
+		urtitle=L"T$_{RMS}$" * " = $(trms_en) K",ultitle="(b)"
 	)
 	
 	for im = 1 : nen
@@ -319,7 +319,7 @@ begin
 	aen[3].format(
 		xlim=(-1.5,1.5),xlocator=(-2:2),
 		xlabel=L"qr = $\frac{q - q_{OBS}}{q_{OBS}}$ / %",
-		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",
+		ylim=(1010,25),yscale="log",ylabel="Pressure / hPa",ultitle="(c)"
 	)
 	
 	cqen = aen[4].contourf(
@@ -333,13 +333,13 @@ begin
 		xlim=(0,nt_en),
 		ylim=(1010,25),yscale="log",
 		xlabel="time / days",ylabel="Pressure / hPa",
-		urtitle=L"$qr_{RMS}$" * " = $(qrms_en) %"# * L" g kg$^{-1}$"
+		urtitle=L"$qr_{RMS}$" * " = $(qrms_en) %",ultitle="(d)"
 	)
 	
 	aen[2].colorbar(cten,loc="r",width=0.2)
 	aen[4].colorbar(cqen,loc="r",width=0.2)
-	fen.savefig("rcetdts-$(config)-ensemble.png",transparent=false,dpi=200)
-	load("rcetdts-$(config)-ensemble.png")
+	fen.savefig(plotsdir("rcetdts-$(config)-ensemble.png"),transparent=false,dpi=200)
+	load(plotsdir("rcetdts-$(config)-ensemble.png"))
 	
 end
 

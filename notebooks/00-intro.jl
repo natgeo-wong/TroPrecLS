@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.21
+# v0.14.0
 
 using Markdown
 using InteractiveUtils
@@ -39,9 +39,10 @@ The general outline of this project is:
 * Plot the 2D rain/PWV fields ... is there convective aggregation?
 
 
-8. The Impact of the Diurnal Cycle on P-r
+8. Explore the statistics of the diurnal cycle under WTG
 * Calculate energy imbalance when slab depth is infinity
 * Investigate slab-depth and the diurnal amplitude of SST
+* What happens when you add ocean-heat transport?
 "
 
 # ╔═╡ Cell order:

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.21
+# v0.14.0
 
 using Markdown
 using InteractiveUtils
@@ -162,7 +162,7 @@ end
 # ╔═╡ 55230f4a-7661-11eb-1c37-8b022b95e08e
 begin
 	pplt.close()
-	fts,ats = pplt.subplots(nrows=3,aspect=3,axwidth=3,hspace=0.2,sharey=0)
+	fts,ats = pplt.subplots(nrows=3,aspect=3,axwidth=4,hspace=0.2,sharey=0)
 	
 	for ic in 1 : ncon
 		config = configvec[ic]
@@ -208,18 +208,18 @@ begin
 		ylocator=10. .^(-3:3),
 		# yscale_kw=Dict("linthresh"=>0.1),
 		ylim=(0.005,200),
-		suptitle=expname
+		suptitle=expname,ultitle="(a)"
 	)
 	
 	ats[2].format(
 		ylim=(0,75),ylabel="PW / mm",
-		suptitle=expname
+		suptitle=expname,ultitle="(b)"
 	)
 	
 	ats[3].format(
 		xlim=(00,500),xlabel="Time / Days",
 		ylim=(-250,250),ylabel=L"SEB / W m$^{-2}$",ylocator=(-3:3)*100,
-		suptitle=expname
+		suptitle=expname,ultitle="(c)"
 	)
 	
 	fts.savefig(plotsdir(
