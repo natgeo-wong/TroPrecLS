@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.2
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -50,7 +50,7 @@ Relevant model parameters:
 "
 
 # ╔═╡ 2b81f1ca-07eb-494d-b959-2c94632b6d5b
-config = "Slab00d7"
+config = "Slab00d1"
 
 # ╔═╡ b41d77a2-420e-4e10-86b7-8869c1b8ba2d
 nmem = 5
@@ -73,6 +73,14 @@ begin
 	prcp  = prcp[:]
 	
 	md"Loading sea surface temperature and precipitation data for $(config) configuration ..."
+end
+
+# ╔═╡ b2c51fe0-d622-49da-bde3-90ccda3dae47
+begin
+	prcp_mean = dropdims(mean(reshape(prcp,48,:),dims=2),dims=2)
+	tsst_mean = dropdims(mean(reshape(t_sst,48,:),dims=2),dims=2)
+	tdiurnal = -11.75:0.5:12
+	md"Calculating mean diurnal cycle ..."
 end
 
 # ╔═╡ 7d6a3ec5-5fef-4cb8-962d-c573aa46bd2a
@@ -118,6 +126,7 @@ begin
 			-24:0.5:0,prcp_bins,prcp_hist',
 			cmap="Blues",levels=lvls,extend="both"
 		)
+		a1[1].plot(tdiurnal,prcp_mean,lw=3,c="k")
 		a1[1].format(ltitle=L"(a) Precipitation Rate / mm hr$^{-1}$")
 		f1.colorbar(c,loc="r",ticks=[])
 
@@ -129,6 +138,7 @@ begin
 			-24:0.5:0,tsst_bins,tsst_hist',
 			cmap="Fire",levels=lvls,extend="both"
 		)
+		a1[2].plot(tdiurnal,tsst_mean,lw=3,c="r")
 		a1[2].format(ltitle="(b) Sea Surface Temperature / K")
 		f1.colorbar(c,loc="r",ticks=[0.2,0.5,1,2,5,10,20,50],label="Density")
 
@@ -151,9 +161,10 @@ end
 # ╠═2b81f1ca-07eb-494d-b959-2c94632b6d5b
 # ╠═b41d77a2-420e-4e10-86b7-8869c1b8ba2d
 # ╟─950f6d71-4f36-4ad2-bbd7-bb2c12ea7ce5
+# ╟─b2c51fe0-d622-49da-bde3-90ccda3dae47
 # ╠═7d6a3ec5-5fef-4cb8-962d-c573aa46bd2a
 # ╠═9e5b9009-a18a-4f20-b169-f4abc020fe8f
 # ╟─79b1debd-3365-4709-8fbe-4088608c9675
 # ╟─94a9f7c8-a7f1-4fcc-a0ef-7cf6bdc62c86
 # ╟─016955c3-aa3a-42d3-9894-0b2c85221c5e
-# ╠═f48c072b-6a95-4b48-9123-cc722bb3e44a
+# ╟─f48c072b-6a95-4b48-9123-cc722bb3e44a

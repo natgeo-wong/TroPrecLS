@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.0
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -67,7 +67,7 @@ end
 
 # ╔═╡ a4458db2-5248-11eb-3ecf-b9bcdde2ec37
 begin
-	ds  = NCDataset(datadir("koppen.nc"))
+	ds  = NCDataset(srcdir("koppen.nc"))
 	lon = ds["longitude"][:]
 	lat = ds["latitude"][:]
 	kctrop = ds["koppenclass_tropics"][:]
@@ -132,6 +132,35 @@ begin
 	gregioninfoadd(srcdir("gregionsadd.txt"))
 end
 
+# ╔═╡ cfae2866-a99d-4da9-823a-e069c0fc6148
+md"
+### C. Koppen Classification for Individual Regions
+"
+
+# ╔═╡ 1e560bb3-a749-4d2a-bfb2-3c90f9a57795
+reg = SEA
+
+# ╔═╡ fa5dbc76-84e4-4889-9e28-2b1053a3d6c9
+begin
+	asp = (reg[1][2]-reg[1][1])/(reg[2][3]-reg[2][1])
+	pplt.close(); freg,areg = pplt.subplots(aspect=asp,axwidth=asp*1.5);
+	
+	areg[1].pcolormesh(lon,lat,kctrop',levels=0:6,cmap="Reds_r")
+	areg[1].pcolormesh(lon,lat,kcarid',levels=5:9,cmap="Yellow3_r")
+	areg[1].pcolormesh(lon,lat,kctemph',levels=6:12,cmap="Green2_r")
+	areg[1].pcolormesh(lon,lat,kctemps',levels=11:15,cmap="Brown1_r")
+	areg[1].pcolormesh(lon,lat,kctempw',levels=12:18,cmap="Blue3_r")
+	areg[1].plot(x,y,c="k",lw=0.5)
+	
+	areg[1].format(
+		xlim=(reg[1][1],reg[1][2]),xlabel=L"Longitude / $\degree$",
+		ylim=(reg[2][1],reg[2][3]),ylabel=L"Latitude / $\degree$",grid=true
+	)
+	
+	freg.savefig(plotsdir("SEA.png"),transparent=false,dpi=200)
+	load(plotsdir("SEA.png"))
+end
+
 # ╔═╡ Cell order:
 # ╟─f9606c7e-51f4-11eb-2e24-d998e4a91b9a
 # ╟─bcfd5bd8-51f5-11eb-1d79-ab69c65febaf
@@ -145,3 +174,6 @@ end
 # ╟─ce969b7e-5248-11eb-36c2-dd1900221e34
 # ╟─f8ee207c-5700-11eb-1a7a-0b7f629d74b9
 # ╟─2f20e814-5701-11eb-342d-51eae68d652c
+# ╟─cfae2866-a99d-4da9-823a-e069c0fc6148
+# ╠═1e560bb3-a749-4d2a-bfb2-3c90f9a57795
+# ╠═fa5dbc76-84e4-4889-9e28-2b1053a3d6c9

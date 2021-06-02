@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.1
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -257,7 +257,7 @@ We can get quick snapshots of the results for different GeoRegions specified in 
 
 # ╔═╡ 271c15e6-9426-11eb-3c64-912620b1a8ce
 begin
-	N,S,E,W = [6,-6,107,95]
+	N,S,E,W = [20,-15,165,90]
 	md"Defining region coordinates ..."
 end
 
@@ -274,11 +274,16 @@ end
 # ╔═╡ 5714c13c-575c-11eb-06d4-838b4e8dbcd7
 begin
 	asp = (maximum(rlon)-minimum(rlon))/(maximum(rlat)-minimum(rlat))
-	pplt.close(); freg,areg = pplt.subplots(ncols=3,axwidth=2,aspect=asp)
+	pplt.close()
+	if asp > 1.5
+		freg,areg = pplt.subplots(nrows=2,axwidth=3,aspect=asp)
+	else
+		freg,areg = pplt.subplots(ncols=2,axwidth=2,aspect=asp)
+	end
 	
 	creg = areg[1].contourf(rlon,rlat,rμ',cmap="Blues",levels=μlvls,extend="both")
 	areg[1].plot(x,y,c="k",lw=0.5)
-	areg[1].format(rtitle=L"$\mu$ / mm hr$^{-1}$")
+	areg[1].format(urtitle=L"$\mu$ / mm hr$^{-1}$")
 	areg[1].colorbar(creg,loc="r")
 	
 	creg = areg[2].contourf(
@@ -286,18 +291,18 @@ begin
 		cmap="broc_r",levels=Alvls,extend="both"
 	)
 	areg[2].plot(x,y,c="k",lw=0.5)
-	areg[2].format(rtitle=L"A/$\mu$")
+	areg[2].format(urtitle=L"A / $\mu$")
 	areg[2].colorbar(creg,loc="r")
 	
-	creg = areg[3].pcolormesh(rlon,rlat,rθ',cmap="romaO",levels=0:0.5:24)
-	areg[3].plot(x,y,c="k",lw=0.5)
-	areg[3].format(rtitle=L"$\theta$ / Hour of Day")
-	areg[3].colorbar(creg,loc="r",ticks=6)
+	# creg = areg[3].pcolormesh(rlon,rlat,rθ',cmap="romaO",levels=0:0.5:24)
+	# areg[3].plot(x,y,c="k",lw=0.5)
+	# areg[3].format(rtitle=L"$\theta$ / Hour of Day")
+	# areg[3].colorbar(creg,loc="r",ticks=6)
 	
 	for ax in areg
 		ax.format(
-			xlim=(minimum(rlon),maximum(rlon)),
-			ylim=(minimum(rlat),maximum(rlat))
+			xlim=(90,165),xlabel=L"Longitude / $\degree$",
+			ylim=(-15,20),ylabel=L"Latitude / $\degree$"
 		)
 	end
 	
@@ -527,7 +532,7 @@ end
 # ╟─68cfc46c-5755-11eb-1702-373942539652
 # ╠═271c15e6-9426-11eb-3c64-912620b1a8ce
 # ╟─ea7f0956-575b-11eb-3e3f-a1ba3e08b771
-# ╟─5714c13c-575c-11eb-06d4-838b4e8dbcd7
+# ╠═5714c13c-575c-11eb-06d4-838b4e8dbcd7
 # ╟─c4792bf2-5552-11eb-3b52-997f59fd42f3
 # ╟─1fadf4ca-5755-11eb-1ece-a99313019785
 # ╟─f752b054-57c1-11eb-117c-ed52464aa25f
@@ -538,4 +543,4 @@ end
 # ╟─5f58ae9c-57c2-11eb-1f04-2ddbaf2b4f1b
 # ╟─1432fa12-57c7-11eb-0606-7be0389e8fb3
 # ╟─76627730-57c7-11eb-2037-3f608e085a04
-# ╟─8d739d0a-57c7-11eb-16b6-736f595e329e
+# ╠═8d739d0a-57c7-11eb-16b6-736f595e329e

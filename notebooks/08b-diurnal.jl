@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.2
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -50,15 +50,17 @@ We first load the 2D data of surface temperature and precipitation, bin it accor
 function retrieve2D(variable,configlist,beg,tstep,tshift)
 	
 	nconfig = length(configlist);
-	d2D  = zeros(tstep+2,nconfig)
+	d2D  = zeros(48,nconfig)
 	
-	for iconfig = 1 : nconfig
-		var = retrievevar2D(variable,"DiAmp064km",configlist[iconfig])
-		var = dropdims(mean(var,dims=(1,2)),dims=(1,2))
-		d2D[:,iconfig] = diurnal2D(var[(end-beg):end],tstep,tshift);
+	for ic = 1 : nconfig
+		for ii = 1 : 5
+			fnc = outstatname("DiAmp064km",configlist[ic],false,true,ii)
+			var = retrievevar(variable,fnc)[9601:end]
+			d2D[:,ic] += dropdims(mean(reshape(var,48,:),dims=2),dims=2)
+		end
 	end
 	
-	return d2D
+	return d2D / 5
 	
 end
 
@@ -99,7 +101,7 @@ function plot2DWTG(axs,axsii,td,prcp,configlist,colors;islegend::Bool=false)
 			axs[axsii].plot(
 				td,prcp[:,iconfig],color=colors[iconfig+2],lw=1,
 				label="$(config) m",
-				legend="b",legend_kw=Dict("frame"=>false,"ncols"=>5)
+				legend="b",legend_kw=Dict("frame"=>false,"ncols"=>6)
 			)
 		else
 			axs[axsii].plot(td,prcp[:,iconfig],color=colors[iconfig+2],lw=1)
@@ -112,13 +114,15 @@ end
 # ╔═╡ 1ab3ad70-5c2a-11eb-187b-75e524a4581f
 begin
 	configs = [
+		"Slab00d05","Slab00d07",
 		"Slab00d1","Slab00d14","Slab00d2","Slab00d3","Slab00d5",
 		"Slab00d7","Slab01d0","Slab01d4","Slab02d0","Slab03d2",
 		"Slab05d0","Slab07d1","Slab10d0","Slab14d1","Slab20d0",
-		"Slab31d6","Slab50d0","Slab70d7"
+		"Slab31d6",#"Slab50d0","Slab70d7"
 	]
 	ncon = length(configs)
 	colors = pplt.Colors("blues",ncon+4)
+	lndocn = pplt.Colors("Delta_r",ncon+4)
 	md"Defining experimental configurations for WTG experiments ..."
 end
 
@@ -159,15 +163,20 @@ function retrievecsf(configlist,beg,tstep,tshift)
 	nconfig = length(configlist);
 	var  = zeros(nconfig)
 	
-	for iconfig = 1 : nconfig
-		tcw = retrievevar("PW","DiAmp064km",configlist[iconfig]) / 1000
-		ta  = retrievevar("TABS","DiAmp064km",configlist[iconfig])
-		qv  = retrievevar("QV","DiAmp064km",configlist[iconfig]) / 1000
-		pp  = retrievevar("p","DiAmp064km",configlist[iconfig])
-		rh  = calcrh(qv,ta,pp)
-		_,swp = calccsf(rh,qv,pp)
-		var[iconfig] = mean(tcw[(end-beg):end]./swp[(end-beg):end])
+	for ic = 1 : nconfig
+		for ii = 1 : 5
+			fnc = outstatname("DiAmp064km",configlist[ic],false,true,ii)
+			tcw = retrievevar("PW",fnc) / 1000
+			ta  = retrievevar("TABS",fnc)
+			qv  = retrievevar("QV",fnc) / 1000
+			pp  = retrievevar("p",fnc)
+			rh  = calcrh(qv,ta,pp)
+			_,swp = calccsf(rh,qv,pp)
+			var[ic] += mean(tcw[(end-beg):end]./swp[(end-beg):end])
+		end
 	end
+	
+	var = var / 5
 	
 	return var
 	
@@ -175,11 +184,16 @@ end
 
 # ╔═╡ 1a31f88e-5c2a-11eb-0c1f-257863a43cf5
 begin
-	_W,_W,tWTG = retrievedims2D("DiAmp064km","Slab01d0")
+	_W,_W,tWTG = retrievedims("DiAmp064km","Slab01d0")
 	tdWTG,tstepWTG,tshiftWTG,begWTG = t2d(tWTG,ndy);
-	prcpWTG = retrieve2D("Prec",configs,begWTG,tstepWTG,tshiftWTG)
+	prcpWTG = retrieve2D("PREC",configs,begWTG,tstepWTG,tshiftWTG)
 	sstWTG  = retrieve2D("SST",configs,begWTG,tstepWTG,tshiftWTG)
 	tcwWTG  = retrieve2D("PW",configs,begWTG,tstepWTG,tshiftWTG)
+	capeWTG = retrieve2D("CAPE",configs,begWTG,tstepWTG,tshiftWTG)
+	cinWTG  = retrieve2D("CIN",configs,begWTG,tstepWTG,tshiftWTG)
+	sshfWTG = retrieve2D("SHF",configs,begWTG,tstepWTG,tshiftWTG)
+	slhfWTG = retrieve2D("LHF",configs,begWTG,tstepWTG,tshiftWTG)
+	cldWTG  = retrieve2D("CLDSHD",configs,begWTG,tstepWTG,tshiftWTG)
 	csfWTG  = retrievecsf(configs,begWTG,tstepWTG,tshiftWTG)
 md"Loading results from the WTG Slab-depth experiments ..."
 end
@@ -187,18 +201,27 @@ end
 # ╔═╡ 7d401cd6-5c2e-11eb-3842-917545e546ef
 begin
 	
-	pplt.close(); f,axs = pplt.subplots(nrows=2,axwidth=4,aspect=2.5,sharey=0)
+	pplt.close(); f,axs = pplt.subplots(ncols=3,nrows=3,axwidth=2.5,aspect=1.5,sharey=0)
 	
-	plot2DWTG(axs,1,tdWTG/2,sstWTG,configs,colors)
-	plot2DWTG(axs,1,tdWTG/2 .-24,sstWTG,configs,colors)
-	plot2DWTG(axs,2,tdWTG/2,prcpWTG/24,configs,colors)
-	plot2DWTG(axs,2,tdWTG/2 .-24,prcpWTG/24,configs,colors,islegend=true)
-	
-	axs[1].plot(tdRCE,sstRCE,c="k")
-	axs[2].plot(tdRCE,prcpRCE/24,c="k",label="RCE",legend="b")
+	plot2DWTG(axs,1,-11.75:0.5:12,sstWTG,configs,colors)
+	plot2DWTG(axs,2,-11.75:0.5:12,prcpWTG/24,configs,colors)
+	plot2DWTG(axs,3,-11.75:0.5:12,cldWTG*100,configs,colors)
+	plot2DWTG(axs,4,-11.75:0.5:12,capeWTG,configs,colors)
+	plot2DWTG(axs,5,-11.75:0.5:12,cinWTG,configs,colors)
+	plot2DWTG(axs,6,-11.75:0.5:12,capeWTG.-cinWTG,configs,colors)
+	plot2DWTG(axs,7,-11.75:0.5:12,sshfWTG,configs,colors)
+	plot2DWTG(axs,8,-11.75:0.5:12,slhfWTG,configs,colors,islegend=true)
+	plot2DWTG(axs,9,-11.75:0.5:12,sshfWTG.+slhfWTG,configs,colors)
 	
 	axs[1].format(ylim=(290,315),ultitle="(a) SST / K")
 	axs[2].format(ylim=(0,3.5),ultitle=L"(b) Rainfall Rate / mm hr$^{-1}$")
+	axs[3].format(ylim=(0,100),ultitle="(c) Cloud Cover / %")
+	axs[4].format(ylim=(-5,35).*100,ultitle=L"(d) CAPE / J kg$^{-1}$")
+	axs[5].format(ylim=(0,200),ultitle=L"(e) CIN / J kg$^{-1}$",yscale="symlog",yscale_kw=Dict("linthresh"=>0.1))
+	axs[6].format(ylim=(-5,35).*100,ultitle=L"(f) CAPE - CIN / J kg$^{-1}$")
+	axs[7].format(ylim=(0,200),ultitle=L"(g) Sensible Heat Flux / W m$^{-2}$")
+	axs[8].format(ylim=(0,800),ultitle=L"(h) Latent Heat Flux / W m$^{-2}$")
+	axs[9].format(ylim=(0,800),ultitle=L"(i) Surface Fluxes / W m$^{-2}$")
 	
 	for ax in axs
 		ax.format(xlim=(-12,12),xlabel="Hour of Day",xlocator=-24:3:24)
@@ -211,15 +234,15 @@ end
 
 # ╔═╡ d7735d46-5e9a-11eb-0fb3-91be12c3508b
 begin
-	sstWTG_mean  = dropdims(mean(sstWTG[1:(end-1),:],dims=1),dims=1)
-	sstWTG_max   = dropdims(maximum(sstWTG[1:(end-1),:],dims=1),dims=1)
-	sstWTG_min   = dropdims(minimum(sstWTG[1:(end-1),:],dims=1),dims=1)
+	sstWTG_mean  = dropdims(mean(sstWTG,dims=1),dims=1)
+	sstWTG_max   = dropdims(maximum(sstWTG,dims=1),dims=1)
+	sstWTG_min   = dropdims(minimum(sstWTG,dims=1),dims=1)
 	sstWTG_dicy  = (sstWTG_max.-sstWTG_min)./2
-	prcpWTG_mean = dropdims(mean(prcpWTG[1:(end-1),:],dims=1),dims=1)
-	prcpWTG_max  = dropdims(maximum(prcpWTG[1:(end-1),:],dims=1),dims=1)
-	prcpWTG_min  = dropdims(minimum(prcpWTG[1:(end-1),:],dims=1),dims=1)
+	prcpWTG_mean = dropdims(mean(prcpWTG,dims=1),dims=1)
+	prcpWTG_max  = dropdims(maximum(prcpWTG,dims=1),dims=1)
+	prcpWTG_min  = dropdims(minimum(prcpWTG,dims=1),dims=1)
 	prcpWTG_dicy  = (prcpWTG_max.-prcpWTG_min)./2
-	tcwWTG_mean  = dropdims(mean(tcwWTG[1:(end-1),:],dims=1),dims=1)
+	tcwWTG_mean  = dropdims(mean(tcwWTG,dims=1),dims=1)
 	md"Doing some basic statistics ..."
 end
 
@@ -229,55 +252,56 @@ begin
 	pplt.close(); f1,a1 = pplt.subplots(ncols=3,nrows=2,sharey=0,axwidth=2)
 	
 	slabs = [
+		0.05,0.0707,
 		0.1,0.141,0.2,0.316,0.5,0.707,
 		1,1.41,2,3.16,5,7.07,
-		10,14.1,20,31.6,50,70.7
+		10,14.1,20,31.6
 	]
 	nslab = length(slabs)
-	a1[1].scatter(slabs,sstWTG_mean,c=colors[3:(nslab+2)])
-	a1[1].fill_between([0.1,100],298,298.5,color="g",alpha=0.3)
-	a1[1].fill_between([0.1,100],300.5,302.5,color="b",alpha=0.3)
-	a1[1].plot([0.1,100],[1,1]*301.7,color="k")
-	a1[1].plot([0.1,100],[1,1]*301.545,color="b",linestyle="--")
-	a1[1].plot([0.1,100],[1,1]*300.683,color="k",linestyle="--")
-	a1[1].plot([0.1,100],[1,1]*300.382,color="blue3",linestyle="--")
-	a1[1].plot([0.1,100],[1,1]*298.169,color="b",linestyle="-.")
-	a1[1].plot([0.1,100],[1,1]*298.363,color="blue3",linestyle="-.")
+	a1[1].scatter(slabs,sstWTG_mean,s=20)
+	a1[1].fill_between([0,100],298,298.5,color="g",alpha=0.3)
+	a1[1].fill_between([0,100],300.5,302.5,color="b",alpha=0.3)
+	a1[1].plot([0,100],[1,1]*301.7,color="k")
+	a1[1].plot([0,100],[1,1]*301.545,color="b",linestyle="--")
+	a1[1].plot([0,100],[1,1]*300.683,color="k",linestyle="--")
+	a1[1].plot([0,100],[1,1]*300.382,color="blue3",linestyle="--")
+	a1[1].plot([0,100],[1,1]*298.169,color="b",linestyle="-.")
+	a1[1].plot([0,100],[1,1]*298.363,color="blue3",linestyle="-.")
 	
-	a1[2].scatter(slabs,prcpWTG_mean/24,c=colors[3:(nslab+2)])
-	a1[2].plot([0.1,100],[1,1]*0.126,color="k")
-	a1[2].plot([0.1,100],[1,1]*0.284,color="b",linestyle="--")
-	a1[2].plot([0.1,100],[1,1]*0.213,color="k",linestyle="--")
-	a1[2].plot([0.1,100],[1,1]*0.133,color="blue3",linestyle="--")
-	a1[2].plot([0.1,100],[1,1]*0.297,color="b",linestyle="-.")
-	a1[2].plot([0.1,100],[1,1]*0.183,color="blue3",linestyle="-.")
+	a1[2].scatter(slabs,prcpWTG_mean/24,s=20)
+	a1[2].plot([0,100],[1,1]*0.126,color="k")
+	a1[2].plot([0,100],[1,1]*0.284,color="b",linestyle="--")
+	a1[2].plot([0,100],[1,1]*0.213,color="k",linestyle="--")
+	a1[2].plot([0,100],[1,1]*0.133,color="blue3",linestyle="--")
+	a1[2].plot([0,100],[1,1]*0.297,color="b",linestyle="-.")
+	a1[2].plot([0,100],[1,1]*0.183,color="blue3",linestyle="-.")
 	
-	a1[3].scatter(slabs,tcwWTG_mean,c=colors[3:(nslab+2)])
+	a1[3].scatter(slabs,tcwWTG_mean,s=20)
 	
-	a1[4].scatter(slabs,sstWTG_dicy,c=colors[3:(nslab+2)])
-	a1[4].fill_between([0.1,100],4,5,color="g",alpha=0.3)
-	a1[4].fill_between([0.1,100],0.15,0.25,color="b",alpha=0.3)
-	a1[4].plot([0.1,100],[1,1]*0.218,color="b",linestyle="--")
-	a1[4].plot([0.1,100],[1,1]*0.170,color="k",linestyle="--")
-	a1[4].plot([0.1,100],[1,1]*0.160,color="blue3",linestyle="--")
-	a1[4].plot([0.1,100],[1,1]*4.461,color="b",linestyle="-.")
-	a1[4].plot([0.1,100],[1,1]*4.659,color="blue3",linestyle="-.")
+	a1[4].scatter(slabs,sstWTG_dicy,s=20)
+	a1[4].fill_between([0,100],4,5,color="g",alpha=0.3)
+	a1[4].fill_between([0,100],0.15,0.25,color="b",alpha=0.3)
+	a1[4].plot([0,100],[1,1]*0.218,color="b",linestyle="--")
+	a1[4].plot([0,100],[1,1]*0.170,color="k",linestyle="--")
+	a1[4].plot([0,100],[1,1]*0.160,color="blue3",linestyle="--")
+	a1[4].plot([0,100],[1,1]*4.461,color="b",linestyle="-.")
+	a1[4].plot([0,100],[1,1]*4.659,color="blue3",linestyle="-.")
 	
-	a1[5].scatter(slabs,prcpWTG_dicy./prcpWTG_mean,c=colors[3:(nslab+2)])
-	a1[5].fill_between([0.1,100],0.3,2,color="g",alpha=0.3)
-	a1[5].fill_between([0.1,100],0.1,1,color="b",alpha=0.3)
-	a1[5].plot([0.1,100],[1,1]*0.358,color="b",linestyle="--")
-	a1[5].plot([0.1,100],[1,1]*0.397,color="k",linestyle="--")
-	a1[5].plot([0.1,100],[1,1]*0.350,color="blue3",linestyle="--")
-	a1[5].plot([0.1,100],[1,1]*0.889,color="b",linestyle="-.")
-	a1[5].plot([0.1,100],[1,1]*1.240,color="blue3",linestyle="-.")
+	a1[5].scatter(slabs,prcpWTG_dicy./prcpWTG_mean,s=20)
+	a1[5].fill_between([0,100],0.3,2,color="g",alpha=0.3)
+	a1[5].fill_between([0,100],0.1,1,color="b",alpha=0.3)
+	a1[5].plot([0,100],[1,1]*0.358,color="b",linestyle="--")
+	a1[5].plot([0,100],[1,1]*0.397,color="k",linestyle="--")
+	a1[5].plot([0,100],[1,1]*0.350,color="blue3",linestyle="--")
+	a1[5].plot([0,100],[1,1]*0.889,color="b",linestyle="-.")
+	a1[5].plot([0,100],[1,1]*1.240,color="blue3",linestyle="-.")
 	
-	a1[6].scatter(slabs,csfWTG,c=colors[3:(nslab+2)])
+	a1[6].scatter(slabs,csfWTG,s=20)
 	
 	a1[1].format(ylim=(295,305))
 	a1[2].format(ylim=(0,0.8))
 	a1[3].format(ylim=(0,75))
-	a1[4].format(ylim=(0.01,20),yscale="log")
+	a1[4].format(ylim=(0.01,50),yscale="log")
 	a1[5].format(ylim=(0.01,3))
 	a1[6].format(ylim=(0,1))
 	
@@ -289,7 +313,7 @@ begin
 	a1[6].format(ultitle="(f) Column Saturation Fraction")
 	
 	for ax in a1
-		ax.format(xscale="log",xlabel="Slab Depth / m",xlim=(0.1,100))
+		ax.format(xscale="log",xlabel="Slab Depth / m",xlim=(0.05,100))
 	end
 	
 	f1.savefig(plotsdir("DiurnalAmp_slabmeans.png"),transparent=false,dpi=200)
@@ -462,6 +486,86 @@ end
 # ╔═╡ f4519a32-94fc-11eb-1401-c3f85279a602
 md"However, when the mixed layer depth is thinner than 0.2 m, then the model also fluctuates between dry and wet states, but the dry states have significant daily precipitation compared to model runs when the mixed layer depth is thicker than 0.2 m.  It is also of note that wet states occur every 2 days, whereas for thicker ocean mixed-layer depths, it takes some days for dry regimes to build up enough moisture to cause a very wet state."
 
+# ╔═╡ 3e6b4913-6ff7-4298-86e4-dbe49367d584
+md"
+### D. Hour of Maximum Rainfall
+"
+
+# ╔═╡ 9bb67a0d-8d35-449a-b7a6-d4c5b01cac64
+function retrievemaxtime(variable,configlist)
+	
+	nconfig = length(configlist);
+	d2D  = zeros(48,nconfig)
+	vtmp = zeros(48)
+	
+	for ic = 1 : nconfig
+		for ii = 1 : 5
+			fnc = outstatname("DiAmp064km",configlist[ic],false,true,ii)
+			var = retrievevar(variable,fnc)[9601:end]
+			var = reshape(var,48,:); ndy = size(var,2)
+			for idy = 1 : ndy
+				vtmp .= var[:,idy]; imax = argmax(vtmp)
+				if vtmp[imax] > 0.25*24
+					d2D[imax,ic] += 1
+				end
+			end
+		end
+		d2D[:,ic] .= d2D[:,ic] ./ sum(d2D[:,ic]) * 48
+	end
+	
+	d2D = 0.5*d2D .+ 0.25 *(circshift(d2D,(1,0)) .+ circshift(d2D,(-1,0)))
+	
+	return d2D
+	
+end
+
+# ╔═╡ c9acf590-7c4d-4691-ba10-0ec455acd3e0
+begin
+	prcphr = retrievemaxtime("PREC",configs)
+	ssthr = retrievemaxtime("SST",configs)
+	md"Binning the hour of maximum rainfall"
+end
+
+# ╔═╡ b99c20a5-5f88-49c5-94aa-e2e1bedebb5c
+begin
+	pplt.close(); fθ,aθ = pplt.subplots(ncols=2,proj="polar");
+	
+	θvec = collect(-12:0.5:12)/24*2*pi
+	θvec = (θvec[1:(end-1)].+θvec[2:end])/2
+	θvec = vcat(θvec,θvec[1]+2*pi)
+	
+	for islab = 1 : 8
+		aθ[1].plot(
+			θvec,sqrt.(vcat(prcphr[:,islab],prcphr[1,islab])),
+			c=lndocn[islab+2],lw=1,
+			label="$(slabs[islab]) m",
+			legend="r",legend_kw=Dict("frame"=>false,"ncols"=>1)
+		)
+	end
+	for islab = 11 : 18
+		aθ[2].plot(
+			θvec,sqrt.(vcat(prcphr[:,islab],prcphr[1,islab])),
+			c=lndocn[islab+2],lw=1,
+			label="$(slabs[islab]) m",
+			legend="r",legend_kw=Dict("frame"=>false,"ncols"=>1)
+		)
+	end
+	
+	aθ[1].format(ltitle="(a) Land Analogue")
+	aθ[2].format(ltitle="(b) Ocean Analogue")
+	
+	for ax in aθ
+		ax.format(
+			theta0="N",thetaformatter="tau",
+			#rlim=(0,4),rlocator=0:4,
+			suptitle=L"$\theta$ / Fraction of Day"
+		)
+	end
+	
+	fθ.savefig(plotsdir("samdiurnalphase.png"),transparent=false,dpi=200)
+	load(plotsdir("samdiurnalphase.png"))
+end
+
 # ╔═╡ Cell order:
 # ╟─420e093c-5ba4-11eb-07da-c9a80044c8f1
 # ╟─24abbe3a-5bb7-11eb-160b-1323efad463b
@@ -469,11 +573,11 @@ md"However, when the mixed layer depth is thinner than 0.2 m, then the model als
 # ╟─00872bde-94ce-11eb-3ad0-3dafcb957c19
 # ╟─57f52568-5bb9-11eb-1e7f-c34b6efe0bac
 # ╟─c9859e5e-8feb-11eb-0190-79f138ffc1ab
-# ╟─4f40bd7e-5bb9-11eb-34f2-91e1f959c59a
+# ╠═4f40bd7e-5bb9-11eb-34f2-91e1f959c59a
 # ╟─1ab3ad70-5c2a-11eb-187b-75e524a4581f
 # ╟─6e1170f4-5bb9-11eb-0d38-61befdd2ad88
 # ╟─d13eeaf8-5e8e-11eb-006e-2d45aa9253fd
-# ╟─1a31f88e-5c2a-11eb-0c1f-257863a43cf5
+# ╠═1a31f88e-5c2a-11eb-0c1f-257863a43cf5
 # ╟─7d401cd6-5c2e-11eb-3842-917545e546ef
 # ╟─1de751c6-94cf-11eb-045c-97560536c7ee
 # ╟─d7735d46-5e9a-11eb-0fb3-91be12c3508b
@@ -489,3 +593,7 @@ md"However, when the mixed layer depth is thinner than 0.2 m, then the model als
 # ╟─a7a9b46c-94e3-11eb-2959-bb8d0aa67644
 # ╟─e07d0e30-94e3-11eb-36b6-69db4d2ba24f
 # ╟─f4519a32-94fc-11eb-1401-c3f85279a602
+# ╟─3e6b4913-6ff7-4298-86e4-dbe49367d584
+# ╟─9bb67a0d-8d35-449a-b7a6-d4c5b01cac64
+# ╠═c9acf590-7c4d-4691-ba10-0ec455acd3e0
+# ╠═b99c20a5-5f88-49c5-94aa-e2e1bedebb5c

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.0
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -132,12 +132,12 @@ begin
 	
 	c = axs[1].contourf(lon,lat,μ',levels=0.1:0.1:0.9,cmap="Blues",extend="both")
 	axs[1].plot(x,y,c="k",lw=0.5)
-	axs[1].format(urtitle=L"$\mu$ / K")
+	axs[1].format(urtitle=L"$\mu$")
 	axs[1].colorbar(c,loc="r")
 	
 	c = axs[2].contourf(lon,lat,A',levels=10. .^(-2:0.2:0),extend="both")
 	axs[2].plot(x,y,c="k",lw=0.5)
-	axs[2].format(urtitle="A / K")
+	axs[2].format(urtitle="A")
 	axs[2].colorbar(c,loc="r",ticks=[0.01,0.1,1])
 	
 	c = axs[3].pcolormesh(lon,lat,θ',cmap="romaO",levels=0:0.5:24,extend="both")
@@ -146,7 +146,11 @@ begin
 	axs[3].colorbar(c,loc="r")
 	
 	for ax in axs
-		ax.format(xlim=(0,360),ylim=(-30,30),xlocator=0:60:360)
+		ax.format(
+			xlim=(0,360),ylim=(-30,30),xlocator=0:60:360,
+			xlabel=L"Longitude / $\degree$",
+			ylabel=L"Latitude / $\degree$",
+		)
 	end
 	
 	f.savefig(plotsdir("hccmodel_TRP.png"),transparent=false,dpi=200)
@@ -167,7 +171,7 @@ We can get quick snapshots of the results for different GeoRegions specified in 
 
 # ╔═╡ 52b39ff8-9426-11eb-2a86-43f7da15f62e
 begin
-	N,S,E,W = [10,-10,115,95]
+	N,S,E,W = [20,-15,165,90]
 	md"Defining region coordinates ..."
 end
 
@@ -193,12 +197,12 @@ begin
 	
 	creg = areg[1].contourf(rlon,rlat,rμ',levels=(1:9)/10,cmap="Blues",extend="both")
 	areg[1].plot(x,y,c="k",lw=0.5)
-	areg[1].format(urtitle=L"$\mu$ / K")
+	areg[1].format(urtitle=L"$\mu$")
 	areg[1].colorbar(creg,loc="r")
 	
 	creg = areg[2].contourf(rlon,rlat,rA',levels=10. .^(-2:0.2:0),extend="both")
 	areg[2].plot(x,y,c="k",lw=0.5)
-	areg[2].format(urtitle="A / K")
+	areg[2].format(urtitle="A")
 	areg[2].colorbar(creg,loc="r",ticks=[0.01,0.1,1,10,100])
 	
 	creg = areg[3].pcolormesh(rlon,rlat,rθ',cmap="romaO",levels=0:0.5:24)
@@ -209,7 +213,9 @@ begin
 	for ax in areg
 		ax.format(
 			xlim=(minimum(rlon),maximum(rlon)),
-			ylim=(minimum(rlat),maximum(rlat))
+			ylim=(minimum(rlat),maximum(rlat)),
+			xlabel=L"Longitude / $\degree$",
+			ylabel=L"Latitude / $\degree$",
 		)
 	end
 	
@@ -417,16 +423,16 @@ end
 # ╠═fd344560-94d3-11eb-2b79-05c905c5953f
 # ╠═a6a688ca-53ab-11eb-2776-b5380ffb26c1
 # ╟─aa05317e-530b-11eb-2ec1-93aff65659dd
-# ╟─103f85e8-530c-11eb-047d-a537aa60075d
+# ╠═103f85e8-530c-11eb-047d-a537aa60075d
 # ╟─49d13e5c-53af-11eb-29ca-c994a7acd377
 # ╠═e8141e20-53af-11eb-1a23-81d34293c5eb
 # ╟─d82366b0-53b1-11eb-26c1-ff1bb6ccb027
-# ╟─bb59b8d6-53b1-11eb-3631-87ef61219c4c
+# ╠═bb59b8d6-53b1-11eb-3631-87ef61219c4c
 # ╟─5c0e5bae-554e-11eb-3f83-a364ae0a2485
 # ╟─68cfc46c-5755-11eb-1702-373942539652
 # ╠═52b39ff8-9426-11eb-2a86-43f7da15f62e
 # ╟─ea7f0956-575b-11eb-3e3f-a1ba3e08b771
-# ╟─5714c13c-575c-11eb-06d4-838b4e8dbcd7
+# ╠═5714c13c-575c-11eb-06d4-838b4e8dbcd7
 # ╟─c4792bf2-5552-11eb-3b52-997f59fd42f3
 # ╟─1fadf4ca-5755-11eb-1ece-a99313019785
 # ╟─f752b054-57c1-11eb-117c-ed52464aa25f
