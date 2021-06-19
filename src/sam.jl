@@ -184,6 +184,8 @@ end
 
 function tair2qsat(T,P)
 
+	# Formula from Huang [2018]
+	# A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice
     tb = T - 273.15
     if tb <= 0
     	esat = exp(43.494 - 6545.8/(tb+278)) / (tb+868)^2
