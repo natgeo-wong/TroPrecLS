@@ -209,7 +209,7 @@ function calccsf(RH,QV,P)
 
     for it = 1 : nt
 		for ip = 1 : (np-1)
-			QVtmp[ip+1] .= QV[np-ip,it]
+			QVtmp[ip+1] = QV[np-ip,it]
 			tmp = QV[np-ip,it] ./ RH[np-ip,it]
 			if !isnan(tmp)
 				  QVsat[ip+1] = tmp
