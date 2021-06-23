@@ -201,15 +201,21 @@ end
 
 function calccsf(RH,QV,P)
 
-	pvec = vcat(0,reverse(P)) * 100; nt = size(RH,2)
+	pvec = vcat(0,reverse(P)) * 100; nt = size(RH,2); np = length(pvec)
 	QVtmp = zeros(length(pvec))
 	QVsat = zeros(length(pvec))
     csf = zeros(nt)
 	swp = zeros(nt)
 
     for it = 1 : nt
-		QVtmp[2:end] .= reverse(QV[:,it])
-		QVsat[2:end] .= reverse(QV[:,it]) ./ reverse(RH[:,it])
+		for ip = 1 : (np-1)
+			QVtmp[ip+1] .= QV[np+1-ip,it])
+			tmp = QV[np+1-ip,it]) ./ RH[np+1-ip,it])
+			if !isnan(tmp)
+				  QVsat[ip+1] = tmp
+			else; QVsat[ip+1] = 0
+			end
+		end
         csf[it] = integrate(pvec,QVtmp) / integrate(pvec,QVsat)
 		swp[it] = integrate(pvec,QVsat) / 9.81 / 1000
     end
