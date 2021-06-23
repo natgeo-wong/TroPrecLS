@@ -1,0 +1,105 @@
+&PARAMETERS
+
+caseid ='TroPrecLS-Slab05d00-member01',
+
+dx = 1000.,
+dy = 1000.,
+dt = 30.,
+
+doensemble    = .true.,
+nensemble     = 1,
+nrestart      = 0,
+nrestart_skip = 239,
+perturb_type  = 0,
+
+CEM   = .true.,
+OCEAN = .true.,
+
+dosgs            = .true.,
+dodamping        = .true.,
+doupperbound     = .true.,
+docloud          = .true.,
+doprecip         = .true.,
+dolongwave       = .true.,
+doshortwave      = .true.,
+dosurface        = .true.,
+dodynamicocean   = .true.,
+dolargescale     = .true.,
+doradforcing     = .false.,
+dosfcforcing     = .false.,
+docoriolis       = .false.,
+donudging_uv     = .false.,
+donudging_tq     = .false.,
+
+timelargescale = 0
+tauls = 3600.,
+
+SFC_FLX_FXD    = .false.,
+SFC_TAU_FXD    = .false.,
+
+longitude0 = 0.,
+latitude0  = 0.,
+day0       = 80.5,
+tabs_s     = 301.70,
+Szero      = 0,
+
+depth_slab_ocean = 5.000,
+
+nrad = 12,
+
+! note: insolation = solar_constant*cos(zenith_angle)
+! below values are equivalent to insolation = 423.4773 W/m2
+!   coszrs = 0.732650
+
+doperpetual     = .false.,
+doseasons       = .false.,
+dosolarconstant = .true.,
+zenith_angle    = 51.7,
+solar_constant  = 1354.23,
+
+doisccp = .false.,
+domodis = .false.,
+domisr  = .false.,
+
+nstop    = 864000,
+nprint   = 2880,
+nstat    = 60,    ! Calculate statistics every hour!
+nstatfrq = 30,     ! Collect 60 samples per statistical calculation (every 1 minute)
+
+doSAMconditionals     = .false.,
+dosatupdnconditionals = .false.,
+
+nsave2D      = 60,
+nsave2Dstart = 9999999,
+nsave2Dend   = 999999999,
+save2Dbin    = .true.,
+save2Davg    = .true.,
+
+nsave3D      = 120,
+nsave3Dstart = 9999999,
+nsave3Dend   = 999999999,
+save3Dbin    = .true.,
+rad3Dout     = .true.,
+
+/
+
+&UWOPTIONS
+
+compute_advection_everywhere = .true.,
+dowtg_blossey_etal_JAMES2009 = .true., ! alternate implementation
+twtg_scale = 0., ! If WTG/Large-scale is turned on for 100 days, twtg_scale = 1/4 means that the scaling up to WTG from pseudo-RCE occurs over 25 days.
+
+am_wtg  = 2.,                           ! momentum damping rate in 1/d -- note must be non-zero, default= 2.,
+am_wtg_exp = 0.,                        ! exponent of p/p0 in momentum damping rate.
+lambda_wtg = 650.e3,                    ! quarter wavelength in m. default = 650.e3 (=650 km).
+
+dowtg_qnudge = .false.,                 ! if T, nudge q profile to observations on below timescale
+itau_wtg_qnudge = 0.,                   ! inverse nudging timescale for q in 1/day.
+tauz0_wtg_qnudge = 3.e3,
+taulz_wtg_qnudge = 1.5e3,
+
+dowtg_tnudge = .false.,                 ! enable temperature nudging above tropopause
+itau_wtg_tnudge = 0.,                   ! inverse nudging timescale for temperature, 1/day
+taulz_wtg_tnudge = 1.5e3,
+
+/
