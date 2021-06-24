@@ -2,7 +2,6 @@ name = "TroPrecLS"
 authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
 
 [deps]
-ClimateSatellite = "d91beb5f-3141-4656-855d-efd5d97b23c4"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
@@ -18,7 +17,6 @@ PNGFiles = "f57f5aa1-a3ce-4bc8-8ab9-96f992907883"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-QuartzImageIO = "dca85d43-d64c-5e67-8c65-017450d5d020"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
