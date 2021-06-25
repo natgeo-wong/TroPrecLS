@@ -17,12 +17,24 @@ function ncoffsetscale(data::AbstractArray)
 
 end
 
-function bindatasfclnd(coords,bins,var,lon,lat,lsm)
+function bindatasfclnd(geo::GeoRegion,bins,var,lon,lat,lsm)
 
-    tlon,tlat,rinfo = regiongridvec(coords,lon,lat);
-    rvar = regionextractgrid(var,rinfo)
-    rlsm = regionextractgrid(lsm,rinfo)
-    rwgt = ones(size(rlsm)) .* cosd.(reshape(tlat,1,:))
+	ggrd = RegionGrid(geo,lon,lat)
+	ilon = ggrd.ilon; nlon = length(ggrd.ilon)
+	ilat = ggrd.ilat; nlat = length(ggrd.ilat)
+    rvar = zeros(nlon,nlat)
+    rlsm = zeros(nlon,nlat)
+    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glon,1,:))
+
+	if typeof(ggrd) <: PolyGrid
+		  mask = ggrd.mask
+	else; mask = ones(nlon,nlat)
+	end
+
+	for glat in 1 : nlat, glon in 1 : nlon
+		rvar[glon,glat] = var[ilon[glon],ilat[glat]]
+		rlsm[glon,glat] = lsm[ilon[glon],ilat[glat]] * mask[glon,glat]
+	end
 
     lvar = rvar[rlsm.>0.5];
 	lvar = lvar[.!ismissing.(lvar)]; lvar = lvar[.!isnan.(lvar)]
@@ -38,12 +50,24 @@ function bindatasfclnd(coords,bins,var,lon,lat,lsm)
 
 end
 
-function bindatasfcsea(coords,bins,var,lon,lat,lsm)
+function bindatasfcsea(geo::GeoRegion,bins,var,lon,lat,lsm)
 
-    tlon,tlat,rinfo = regiongridvec(coords,lon,lat);
-    rvar = regionextractgrid(var,rinfo)
-    rlsm = regionextractgrid(lsm,rinfo)
-    rwgt = ones(size(rlsm)) .* cosd.(reshape(tlat,1,:))
+	ggrd = RegionGrid(geo,lon,lat)
+	ilon = ggrd.ilon; nlon = length(ggrd.ilon)
+	ilat = ggrd.ilat; nlat = length(ggrd.ilat)
+    rvar = zeros(nlon,nlat)
+    rlsm = zeros(nlon,nlat)
+    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glon,1,:))
+
+	if typeof(ggrd) <: PolyGrid
+		  mask = ggrd.mask
+	else; mask = ones(nlon,nlat)
+	end
+
+	for glat in 1 : nlat, glon in 1 : nlon
+		rvar[glon,glat] = var[ilon[glon],ilat[glat]]
+		rlsm[glon,glat] = lsm[ilon[glon],ilat[glat]] * mask[glon,glat]
+	end
 
     svar = rvar[rlsm.<0.5];
 	svar = svar[.!ismissing.(svar)]; svar = svar[.!isnan.(svar)]
@@ -61,9 +85,23 @@ end
 
 function getmean(coords,var,lon,lat,nlvl,lsm)
 
-    tlon,tlat,rinfo = regiongridvec(coords,lon,lat);
-    rvar = regionextractgrid(var,rinfo)
-    rlsm = regionextractgrid(lsm,rinfo)
+	ggrd = RegionGrid(geo,lon,lat)
+	ilon = ggrd.ilon; nlon = length(ggrd.ilon)
+	ilat = ggrd.ilat; nlat = length(ggrd.ilat)
+    rvar = zeros(nlon,nlat,nlvl)
+    rlsm = zeros(nlon,nlat)
+    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glon,1,:))
+
+	if typeof(ggrd) <: PolyGrid
+		  mask = ggrd.mask
+	else; mask = ones(nlon,nlat)
+	end
+
+	for ilvl = 1 : nlvl, glat in 1 : nlat, glon in 1 : nlon
+		rvar[glon,glat] = var[ilon[glon],ilat[glat]]
+		rlsm[glon,glat] = lsm[ilon[glon],ilat[glat]] * mask[glon,glat]
+	end
+
     sprf = zeros(nlvl); lprf = zeros(nlvl)
 
     for ilvl = 1 : nlvl

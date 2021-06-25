@@ -1,4 +1,3 @@
-using GeoRegions
 using NCDatasets
 using Statistics
 using StatsBase
