@@ -41,7 +41,7 @@ function bindatasfclnd(geo::GeoRegion,bins,var,lon,lat,lsm)
     lbin = fit(Histogram,lvar,bins).weights;
 	lbin = lbin ./ sum(lbin) * (length(bins) - 1)
 
-    rvar = rvar .* cosd.(reshape(tlat,1,:))
+    rvar = rvar .* cosd.(reshape(ggrd.glat,1,:))
     lvar = rvar[rlsm.>0.5];
 	lvar = lvar[.!ismissing.(lvar)]; lvar = lvar[.!isnan.(lvar)]
     lvar = lvar / mean(rwgt[rlsm.>0.5])
@@ -74,7 +74,7 @@ function bindatasfcsea(geo::GeoRegion,bins,var,lon,lat,lsm)
     sbin = fit(Histogram,svar,bins).weights;
 	sbin = sbin ./ sum(sbin) * (length(bins) - 1)
 
-    rvar = rvar .* cosd.(reshape(tlat,1,:))
+    rvar = rvar .* cosd.(reshape(ggrd.glat,1,:))
     svar = rvar[rlsm.<0.5];
 	svar = svar[.!ismissing.(svar)]; svar = svar[.!isnan.(svar)]
     svar = svar / mean(rwgt[rlsm.<0.5])
