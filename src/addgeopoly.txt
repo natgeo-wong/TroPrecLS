@@ -13,3 +13,23 @@ RegY  10, 10, -10, -10, 2, 2, 10
 RegID AMZ, TRP, Amazon-Rainforest
 RegX  -75, -60, -40, -55, -75, -75
 RegY  12, 12, -2, -12, -12, 12
+
+RegID SMT, SEA, Sumatra
+RegX  104.5, 92.5, 97, 109, 104.5
+RegY  -8.5, 3.5, 8, -4, -8.5
+
+RegID BRN, SEA, Borneo
+RegX  109.5, 117, 120, 120, 115, 107, 109.5
+RegY  -5, -5, 1, 8, 8, 1.5, -5
+
+RegID SLW, SEA, Sulawesi
+RegX  118, 120, 126, 126, 124, 124, 118, 118
+RegY  -3, 2.5, 2.5, -0.5, -0.5, -7, -7, -3
+
+RegID PHL, SEA, Philippines
+RegX  124, 116, 120, 124, 128, 124
+RegY  4, 7.5, 19, 19, 7, 4
+
+RegID PNG, SEA, New-Guinea
+RegX  129, 136, 150, 153, 153, 150, 137, 129, 129
+RegY  -3, -9, -12, -12, -8, -5, 1, 1, -3

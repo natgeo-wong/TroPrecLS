@@ -7,3 +7,4 @@
 TRP, GLB, 30, 0, -30, 360, Tropics
 DTP, TRP, 10, 0, -10, 360, Deep-Tropics
 CRB, TRP, 25, -90, 15, -60, Caribbean-Islands
+JAV, SEA, -5.5, 105, -9, 115, Java
