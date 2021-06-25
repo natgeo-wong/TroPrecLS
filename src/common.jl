@@ -24,7 +24,7 @@ function bindatasfclnd(geo::GeoRegion,bins,var,lon,lat,lsm)
 	ilat = ggrd.ilat; nlat = length(ggrd.ilat)
     rvar = zeros(nlon,nlat)
     rlsm = zeros(nlon,nlat)
-    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glon,1,:))
+    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glat,1,:))
 
 	if typeof(ggrd) <: PolyGrid
 		  mask = ggrd.mask
@@ -57,7 +57,7 @@ function bindatasfcsea(geo::GeoRegion,bins,var,lon,lat,lsm)
 	ilat = ggrd.ilat; nlat = length(ggrd.ilat)
     rvar = zeros(nlon,nlat)
     rlsm = zeros(nlon,nlat)
-    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glon,1,:))
+    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glat,1,:))
 
 	if typeof(ggrd) <: PolyGrid
 		  mask = ggrd.mask
@@ -90,7 +90,7 @@ function getmean(coords,var,lon,lat,nlvl,lsm)
 	ilat = ggrd.ilat; nlat = length(ggrd.ilat)
     rvar = zeros(nlon,nlat,nlvl)
     rlsm = zeros(nlon,nlat)
-    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glon,1,:))
+    rwgt = ones(nlon,nlat) .* cosd.(reshape(ggrd.glat,1,:))
 
 	if typeof(ggrd) <: PolyGrid
 		  mask = ggrd.mask
