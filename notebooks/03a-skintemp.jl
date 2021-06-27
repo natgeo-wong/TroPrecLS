@@ -171,7 +171,7 @@ We can get quick snapshots of the results for different GeoRegions specified in 
 
 # ╔═╡ 52b39ff8-9426-11eb-2a86-43f7da15f62e
 begin
-	geo = GeoRegion("BRN")
+	geo = GeoRegion("SEA")
 	md"Defining GeoRegion ..."
 end
 

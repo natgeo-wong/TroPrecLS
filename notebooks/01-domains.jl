@@ -48,7 +48,6 @@ These regions were defined as new `GeoRegions` in the files \"src/addgeorect.txt
 
 # ╔═╡ 3f3a7695-ce0b-444b-a8b2-29421050d828
 begin
-	resetGeoRegions()
 	addGeoRegions(srcdir("addgeorect.txt"))
 	addGeoRegions(srcdir("addgeopoly.txt"))
 	

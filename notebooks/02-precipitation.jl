@@ -257,7 +257,7 @@ We can get quick snapshots of the results for different GeoRegions specified in 
 
 # ╔═╡ 271c15e6-9426-11eb-3c64-912620b1a8ce
 begin
-	geo = GeoRegion("BRN")
+	geo = GeoRegion("SMT")
 	md"Defining region coordinates ..."
 end
 

@@ -146,19 +146,25 @@ From the relative humidity that we calculate, we then can calculate column satur
 # ╔═╡ dacb2ffe-5117-11eb-33bf-ff68ff8c6504
 function calccsf(RH,QV,P)
 	
-	pvec = vcat(0,reverse(P)) * 100; nt = size(RH,2)
+	pvec = vcat(0,reverse(P)) * 100; nt = size(RH,2); np = length(pvec)
 	QVtmp = zeros(length(pvec))
 	QVsat = zeros(length(pvec))
     csf = zeros(nt)
 	swp = zeros(nt)
-	
+
     for it = 1 : nt
-		QVtmp[2:end] .= QV[:,it]
-		QVsat[2:end] .= QV[:,it] ./ RH[:,it]
-        csf[it] = integrate(pvec,reverse(QVtmp)) / integrate(pvec,reverse(QVsat))
-		swp[it] = integrate(pvec,reverse(QVsat)) / 9.81/1000
+		for ip = 1 : (np-1)
+			QVtmp[ip+1] = QV[np-ip,it]
+			tmp = QV[np-ip,it] ./ RH[np-ip,it]
+			if !isnan(tmp)
+				  QVsat[ip+1] = tmp
+			else; QVsat[ip+1] = 0
+			end
+		end
+        csf[it] = integrate(pvec,QVtmp) / integrate(pvec,QVsat)
+		swp[it] = integrate(pvec,QVsat) / 9.81 / 1000
     end
-	
+
 	return csf,swp
 	
 end
@@ -311,7 +317,7 @@ md"
 begin
 	# exp = "MakePC"; config = "Forcing0000-Slab10d00"; istst = false;
 	expi = "Control"; config = "slab00d05"; istst = false;
-	expi = "Slab00d05"; config = "forcingn001"; istst = false;
+	expi = "Slab00d05"; config = "forcingn002"; istst = false;
 	# exp = "DiAmp064km"; config = "Slab31d6"; istst = true;
 	isen = true; mbr=1
 end
@@ -330,7 +336,7 @@ begin
 	z,p,t = retrievedims(expi,config,istest=istst,isensemble=isen,member=mbr)
 	nt = length(t)
 	# var2D = retrievevar("AREAPREC",exp,config,istest=istst,isensemble=isen,member=mbr)
-	var2A = retrievevar("PREC",expi,config,istest=istst,isensemble=isen,member=mbr)
+	var2A = retrievevar("SST",expi,config,istest=istst,isensemble=isen,member=mbr)
 	var3T = retrievevar("CLD",expi,config,istest=istst,isensemble=isen,member=mbr)
 	var3Q = retrievevar("QBIAS",expi,config,istest=istst,isensemble=isen,member=mbr)
 	varob = retrievevar("QVOBS",expi,config,istest=istst,isensemble=isen,member=mbr)
@@ -355,8 +361,8 @@ begin
 	
 	plot3Dtimeseries(
 		axsts,1,t.-80,p,
-		var3T,
-		dbeg=0,dend=300,lvl=lvls/10,cmapname="RdBu"
+		varQV*100,
+		dbeg=0,dend=300,lvl=lvls,cmapname="RdBu"
 	)
 	plot3Dtimeseries(
 		axsts,2,t.-80,p,
@@ -377,7 +383,7 @@ begin
 	# )
 	plot2Dtimeseries(
 		axsts,3,t.-80,var2A,
-		dbeg=250,dend=300
+		dbeg=00,dend=50
 	)
 	# plot2Dtimeseries(
 	# 	axsts,3,t.-80,varPW,
@@ -409,7 +415,7 @@ begin
 	
 	axsts[1].format(ylim=(1000,20),yscale="log")
 	axsts[2].format(ylim=(1000,20),yscale="log")
-	# axsts[3].format(ylim=(290,320))
+	# axsts[3].format(ylim=(0,1))
 	# axsts[1].format(xlim=(-12,12),xlocator=-24:3:24)
 	
 	fts.savefig("plots.png",transparent=false,dpi=200)
@@ -418,7 +424,7 @@ begin
 end
 
 # ╔═╡ eb323e5e-92a2-11eb-3596-4ff64f0cea13
-mean(csf)
+mean(var2A)
 
 # ╔═╡ 8676ab94-81ef-11eb-2f9f-7716d1507bc2
 md"
