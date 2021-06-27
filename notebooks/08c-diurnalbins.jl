@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.5
+# v0.14.7
 
 using Markdown
 using InteractiveUtils
@@ -50,20 +50,20 @@ Relevant model parameters:
 "
 
 # ╔═╡ 2b81f1ca-07eb-494d-b959-2c94632b6d5b
-config = "Slab00d1"
+config = "slab00d10"
 
 # ╔═╡ b41d77a2-420e-4e10-86b7-8869c1b8ba2d
 nmem = 5
 
 # ╔═╡ 950f6d71-4f36-4ad2-bbd7-bb2c12ea7ce5
 begin
-	_,_,t = retrievedims("DiAmp064km",config,isensemble=true,member=1)
+	_,_,t = retrievedims("Control",config,isensemble=true,member=1)
 	t = t[9601:end]; nt = length(t)
 	t_sst = zeros(nt,nmem)
 	prcp  = zeros(nt,nmem)
 	
 	for imem = 1 : nmem
-		fnc = outstatname("DiAmp064km",config,false,true,imem)
+		fnc = outstatname("Control",config,false,true,imem)
 		t_sst[:,imem] = retrievevar("SST",fnc)[9601:end]
 		prcp[:,imem]  = retrievevar("PREC",fnc)[9601:end]/24
 	end
@@ -101,7 +101,7 @@ begin
 	tsst_hist = fit(Histogram,(mod.(t,1)*24,t_sst),(time_bins,tsst_bins)).weights
 	prcp_hist = prcp_hist/nt*np*nh; prcp_hist[iszero.(prcp_hist)] .= NaN
 	tsst_hist = tsst_hist/nt*ns*nh; tsst_hist[iszero.(tsst_hist)] .= NaN
-	mldepth = replace(config,"Slab"=>"")
+	mldepth = replace(config,"slab"=>"")
 	mldepth = replace(mldepth,"d"=>".")
 	mldepth = parse(Float64,mldepth)
 	md"Binning SST and Precipitation Rate data ..."

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.2
+# v0.14.7
 
 using Markdown
 using InteractiveUtils
@@ -51,7 +51,7 @@ function outstatname(
 )
 
 	if isensemble
-		  expname = "$(experiment)-member$(@sprintf("%d",member))"
+		  expname = "$(experiment)-member$(@sprintf("%02d",member))"
 	else; expname = experiment
 	end
 
@@ -310,9 +310,10 @@ md"
 # ╔═╡ 5ffd515e-5128-11eb-3b11-815af069d22f
 begin
 	# exp = "MakePC"; config = "Forcing0000-Slab10d00"; istst = false;
-	expi = "DiAmp064km"; config = "Slab00d05"; istst = false;
+	expi = "Control"; config = "slab00d05"; istst = false;
+	expi = "Slab00d05"; config = "forcingn001"; istst = false;
 	# exp = "DiAmp064km"; config = "Slab31d6"; istst = true;
-	isen = true; mbr=5
+	isen = true; mbr=1
 end
 
 # ╔═╡ f440d5ca-5128-11eb-2574-d58f2f7d8fc3
@@ -329,7 +330,7 @@ begin
 	z,p,t = retrievedims(expi,config,istest=istst,isensemble=isen,member=mbr)
 	nt = length(t)
 	# var2D = retrievevar("AREAPREC",exp,config,istest=istst,isensemble=isen,member=mbr)
-	var2A = retrievevar("SST",expi,config,istest=istst,isensemble=isen,member=mbr)
+	var2A = retrievevar("PREC",expi,config,istest=istst,isensemble=isen,member=mbr)
 	var3T = retrievevar("CLD",expi,config,istest=istst,isensemble=isen,member=mbr)
 	var3Q = retrievevar("QBIAS",expi,config,istest=istst,isensemble=isen,member=mbr)
 	varob = retrievevar("QVOBS",expi,config,istest=istst,isensemble=isen,member=mbr)
@@ -355,12 +356,12 @@ begin
 	plot3Dtimeseries(
 		axsts,1,t.-80,p,
 		var3T,
-		dbeg=0,dend=300,lvl=lvls/10,cmapname="RdBu_r"
+		dbeg=0,dend=300,lvl=lvls/10,cmapname="RdBu"
 	)
 	plot3Dtimeseries(
 		axsts,2,t.-80,p,
-		var3Q./varob .-1,
-		dbeg=0,dend=300,lvl=lvls,cmapname="RdBu_r"
+		var3Q./varob*100,
+		dbeg=0,dend=300,lvl=lvls*10,cmapname="drywet"
 	)
 	# plot3Dtimeseries(
 	# 	axsts,1,t.-80,p,varob,
@@ -376,7 +377,7 @@ begin
 	# )
 	plot2Dtimeseries(
 		axsts,3,t.-80,var2A,
-		dbeg=200,dend=300
+		dbeg=250,dend=300
 	)
 	# plot2Dtimeseries(
 	# 	axsts,3,t.-80,varPW,
@@ -408,7 +409,7 @@ begin
 	
 	axsts[1].format(ylim=(1000,20),yscale="log")
 	axsts[2].format(ylim=(1000,20),yscale="log")
-	axsts[3].format(ylim=(290,320))
+	# axsts[3].format(ylim=(290,320))
 	# axsts[1].format(xlim=(-12,12),xlocator=-24:3:24)
 	
 	fts.savefig("plots.png",transparent=false,dpi=200)
