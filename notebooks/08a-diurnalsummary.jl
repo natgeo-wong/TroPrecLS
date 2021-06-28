@@ -28,7 +28,7 @@ end
 
 # ╔═╡ 420e093c-5ba4-11eb-07da-c9a80044c8f1
 md"
-# 8b. The Diurnal Cycle in SAM
+# 8a. The Diurnal Cycle in SAM
 
 In this notebook, we do some basic investigation into the relationship between slab depth and the amplitude of the diurnal cycle when the model is run in RCE state.
 
@@ -101,7 +101,7 @@ function plot2DWTG(axs,axsii,td,prcp,configlist,colors;islegend::Bool=false)
 			axs[axsii].plot(
 				td,prcp[:,iconfig],color=colors[iconfig+2],lw=1,
 				label="$(config) m",
-				legend="b",legend_kw=Dict("frame"=>false,"ncols"=>6)
+				legend="b",legend_kw=Dict("frame"=>false,"ncols"=>5)
 			)
 		else
 			axs[axsii].plot(td,prcp[:,iconfig],color=colors[iconfig+2],lw=1)
@@ -114,8 +114,7 @@ end
 # ╔═╡ 1ab3ad70-5c2a-11eb-187b-75e524a4581f
 begin
 	configs = [
-		"slab00d05",#"slab00d07",
-		"slab00d10","slab00d14","slab00d20",
+		"slab00d05","slab00d07","slab00d10","slab00d14","slab00d20",
 		"slab00d32","slab00d50","slab00d71","slab01d00","slab01d41",
 		"slab02d00","slab03d16","slab05d00","slab07d07","slab10d00",
 		"slab14d14","slab20d00","slab31d62","slab50d00",
@@ -183,7 +182,8 @@ end
 # ╔═╡ 7d401cd6-5c2e-11eb-3842-917545e546ef
 begin
 	
-	pplt.close(); f,axs = pplt.subplots(ncols=3,nrows=3,axwidth=2.5,aspect=1.5,sharey=0)
+	pplt.close()
+	f,axs = pplt.subplots(ncols=3,nrows=3,axwidth=2.5,aspect=1.5,sharey=0)
 	
 	plot2DWTG(axs,1,-11.75:0.5:12,sstWTG,configs,colors)
 	plot2DWTG(axs,2,-11.75:0.5:12,prcpWTG/24,configs,colors)
@@ -234,8 +234,8 @@ begin
 	pplt.close(); f1,a1 = pplt.subplots(ncols=3,nrows=2,sharey=0,axwidth=2)
 	
 	slabs = [
-		0.05,#0.0707,
-		0.1,0.141,0.2,0.316,0.5,0.707,
+		0.05,0.0707,0.1,0.141,
+		0.2,0.316,0.5,0.707,
 		1,1.41,2,3.16,5,7.07,
 		10,14.1,20,31.6,50
 	]
@@ -395,7 +395,7 @@ end
 # ╟─00872bde-94ce-11eb-3ad0-3dafcb957c19
 # ╟─57f52568-5bb9-11eb-1e7f-c34b6efe0bac
 # ╟─c9859e5e-8feb-11eb-0190-79f138ffc1ab
-# ╟─4f40bd7e-5bb9-11eb-34f2-91e1f959c59a
+# ╠═4f40bd7e-5bb9-11eb-34f2-91e1f959c59a
 # ╟─1ab3ad70-5c2a-11eb-187b-75e524a4581f
 # ╟─6e1170f4-5bb9-11eb-0d38-61befdd2ad88
 # ╟─1a31f88e-5c2a-11eb-0c1f-257863a43cf5

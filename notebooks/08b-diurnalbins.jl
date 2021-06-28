@@ -50,7 +50,7 @@ Relevant model parameters:
 "
 
 # ╔═╡ 2b81f1ca-07eb-494d-b959-2c94632b6d5b
-config = "slab00d10"
+config = "slab50d00"
 
 # ╔═╡ b41d77a2-420e-4e10-86b7-8869c1b8ba2d
 nmem = 5
@@ -84,10 +84,10 @@ begin
 end
 
 # ╔═╡ 7d6a3ec5-5fef-4cb8-962d-c573aa46bd2a
-sstmax = 315
+sstmax = 303.5
 
 # ╔═╡ 9e5b9009-a18a-4f20-b169-f4abc020fe8f
-sstmin = 290
+sstmin = 302.5
 
 # ╔═╡ 79b1debd-3365-4709-8fbe-4088608c9675
 md"The minimum and maximum SSTs are $sstmin K and $sstmax K respectively"

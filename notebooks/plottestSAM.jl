@@ -317,9 +317,9 @@ md"
 begin
 	# exp = "MakePC"; config = "Forcing0000-Slab10d00"; istst = false;
 	expi = "Control"; config = "slab00d05"; istst = false;
-	expi = "Slab00d05"; config = "forcingn002"; istst = false;
+	# expi = "Slab00d05"; config = "forcingn006"; istst = false;
 	# exp = "DiAmp064km"; config = "Slab31d6"; istst = true;
-	isen = true; mbr=1
+	isen = true; mbr=2
 end
 
 # ╔═╡ f440d5ca-5128-11eb-2574-d58f2f7d8fc3
@@ -336,7 +336,7 @@ begin
 	z,p,t = retrievedims(expi,config,istest=istst,isensemble=isen,member=mbr)
 	nt = length(t)
 	# var2D = retrievevar("AREAPREC",exp,config,istest=istst,isensemble=isen,member=mbr)
-	var2A = retrievevar("SST",expi,config,istest=istst,isensemble=isen,member=mbr)
+	var2A = retrievevar("PREC",expi,config,istest=istst,isensemble=isen,member=mbr)
 	var3T = retrievevar("CLD",expi,config,istest=istst,isensemble=isen,member=mbr)
 	var3Q = retrievevar("QBIAS",expi,config,istest=istst,isensemble=isen,member=mbr)
 	varob = retrievevar("QVOBS",expi,config,istest=istst,isensemble=isen,member=mbr)
@@ -415,7 +415,7 @@ begin
 	
 	axsts[1].format(ylim=(1000,20),yscale="log")
 	axsts[2].format(ylim=(1000,20),yscale="log")
-	# axsts[3].format(ylim=(0,1))
+	# axsts[3].format(yscale="log",ylim=10. .^(-4,2))
 	# axsts[1].format(xlim=(-12,12),xlocator=-24:3:24)
 	
 	fts.savefig("plots.png",transparent=false,dpi=200)
@@ -424,7 +424,7 @@ begin
 end
 
 # ╔═╡ eb323e5e-92a2-11eb-3596-4ff64f0cea13
-mean(var2A)
+mean(csf)
 
 # ╔═╡ 8676ab94-81ef-11eb-2f9f-7716d1507bc2
 md"

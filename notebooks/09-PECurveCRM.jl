@@ -110,8 +110,8 @@ end
 begin
 	prcp = retrieve2D("PREC",configs)
 	csf  = retrievecsf("Control",configs) * 100
-	ptst = retrievevar("PREC","Slab00d05","forcingn001",isensemble=true,member=1)[9601:end]
-	ctst = retrievecsf("Slab00d05",["forcingn001"]) * 100
+	ptst = retrievevar("PREC","Slab00d05","forcingn002",isensemble=true,member=1)[9601:end]
+	ctst = retrievecsf("Slab00d05",["forcingn002"]) * 100
 	ptst = reshape(ptst,4800,1)
 	ctst = reshape(ctst,4800,1)
 md"Loading results from the WTG Slab-depth experiments ..."

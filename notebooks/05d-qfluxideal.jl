@@ -172,7 +172,7 @@ md"Create LSF files? $(@bind dolsf PlutoUI.Slider(0:1))"
 if isone(dolsf)
 	
 	lsf = lsfinit(np2); lsf[:,2] .= -999.0; lsf[:,1] .= reverse(iza_DTP)
-	mvec = -3 : 0.5 : 3
+	mvec = -5 : 0.5 : 5
 	
 	if !isdir(projectdir("exp/lsf/ideal/")); mkpath(projectdir("exp/lsf/ideal/")) end
 	
@@ -215,4 +215,4 @@ end
 # ╟─655d61b0-089d-4e33-a87b-69b4698c34e9
 # ╠═e28f10d6-31d8-44c0-8ba7-c40a1fddd3ea
 # ╟─ab3edf45-01bd-4b38-9e4b-09bc78fe197a
-# ╟─1ebb803d-fc84-4ced-bff6-dd34d538ec88
+# ╠═1ebb803d-fc84-4ced-bff6-dd34d538ec88
