@@ -153,8 +153,8 @@ begin
 		)
 	end
 	
-	f.savefig(plotsdir("sktmodel_TRP.png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("sktmodel_TRP.png"))
+	f.savefig(plotsdir("sktspatial_TRP.png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("sktspatial_TRP.png"))
 end
 
 # ╔═╡ 5c0e5bae-554e-11eb-3f83-a364ae0a2485
@@ -171,7 +171,7 @@ We can get quick snapshots of the results for different GeoRegions specified in 
 
 # ╔═╡ 52b39ff8-9426-11eb-2a86-43f7da15f62e
 begin
-	geo = GeoRegion("SEA")
+	geo = GeoRegion("BRN")
 	md"Defining GeoRegion ..."
 end
 
@@ -236,8 +236,8 @@ begin
 		)
 	end
 	
-	freg.savefig(plotsdir("sktmodel_$(geo.regID).png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("sktmodel_$(geo.regID).png"))
+	freg.savefig(plotsdir("sktspatial_$(geo.regID).png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("sktspatial_$(geo.regID).png"))
 end
 
 # ╔═╡ c4792bf2-5552-11eb-3b52-997f59fd42f3
@@ -334,8 +334,8 @@ begin
 		ltitle="(b) Ocean"
 	)
 	
-	fbin.savefig(plotsdir("sktdiurnalmean.png"),transparent=false,dpi=200)
-	load(plotsdir("sktdiurnalmean.png"))
+	fbin.savefig(plotsdir("sktmean.png"),transparent=false,dpi=200)
+	load(plotsdir("sktmean.png"))
 end
 
 # ╔═╡ 0fbb0b46-57c2-11eb-365a-a73a2ebda8e4
@@ -495,5 +495,5 @@ end
 # ╟─252508a8-57c2-11eb-08b5-8fa673b1ac8a
 # ╟─5f58ae9c-57c2-11eb-1f04-2ddbaf2b4f1b
 # ╟─1432fa12-57c7-11eb-0606-7be0389e8fb3
-# ╠═76627730-57c7-11eb-2037-3f608e085a04
+# ╟─76627730-57c7-11eb-2037-3f608e085a04
 # ╟─8d739d0a-57c7-11eb-16b6-736f595e329e

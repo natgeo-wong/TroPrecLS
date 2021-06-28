@@ -235,8 +235,8 @@ begin
 		)
 	end
 	
-	f.savefig(plotsdir("precipdiurnal_TRP.png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("precipdiurnal_TRP.png"))
+	f.savefig(plotsdir("gpmspatial_TRP.png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("gpmspatial_TRP.png"))
 end
 
 # ╔═╡ 5c0e5bae-554e-11eb-3f83-a364ae0a2485
@@ -257,7 +257,7 @@ We can get quick snapshots of the results for different GeoRegions specified in 
 
 # ╔═╡ 271c15e6-9426-11eb-3c64-912620b1a8ce
 begin
-	geo = GeoRegion("SMT")
+	geo = GeoRegion("BRN")
 	md"Defining region coordinates ..."
 end
 
@@ -322,8 +322,8 @@ begin
 		)
 	end
 	
-	freg.savefig(plotsdir("precipmodel_$(geo.regID).png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("precipmodel_$(geo.regID).png"))
+	freg.savefig(plotsdir("gpmspatial_$(geo.regID).png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("gpmspatial_$(geo.regID).png"))
 end
 
 # ╔═╡ c4792bf2-5552-11eb-3b52-997f59fd42f3
@@ -424,8 +424,8 @@ begin
 		ltitle="(b) Ocean"
 	)
 	
-	fbin.savefig(plotsdir("gpmdiurnalmean.png"),transparent=false,dpi=200)
-	load(plotsdir("gpmdiurnalmean.png"))
+	fbin.savefig(plotsdir("gpmmean.png"),transparent=false,dpi=200)
+	load(plotsdir("gpmmean.png"))
 end
 
 # ╔═╡ 0fbb0b46-57c2-11eb-365a-a73a2ebda8e4

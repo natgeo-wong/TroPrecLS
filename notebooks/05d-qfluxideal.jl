@@ -55,7 +55,7 @@ We have previously calculated the qflux profiles for different regions in the De
 "
 
 # ╔═╡ c00e1e75-376c-4350-8d62-7e146c35783c
-PNGFiles.load(plotsdir("qfc.png"))
+PNGFiles.load(plotsdir("qfluxprofile.png"))
 
 # ╔═╡ 387c8f5a-8b87-47f9-b179-d9ee14b0a8ae
 md"And we see that over the ocean basins in the Deep Tropical (DTP) region, the qflux seems to roughly follow a tangent profile"

@@ -153,8 +153,8 @@ begin
 		)
 	end
 	
-	f.savefig(plotsdir("tccmodel_TRP.png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("tccmodel_TRP.png"))
+	f.savefig(plotsdir("tccspatial_TRP.png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("tccspatial_TRP.png"))
 end
 
 # ╔═╡ 5c0e5bae-554e-11eb-3f83-a364ae0a2485
@@ -171,7 +171,7 @@ We can get quick snapshots of the results for different GeoRegions specified in 
 
 # ╔═╡ 52b39ff8-9426-11eb-2a86-43f7da15f62e
 begin
-	geo = GeoRegion("BRN")
+	geo = GeoRegion("SMT")
 	md"Defining region coordinates ..."
 end
 
@@ -236,8 +236,8 @@ begin
 		)
 	end
 	
-	freg.savefig(plotsdir("tccmodel_reg.png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("tccmodel_reg.png"))
+	freg.savefig(plotsdir("tccspatial_$(geo.regID).png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("tccspatial_$(geo.regID).png"))
 end
 
 # ╔═╡ c4792bf2-5552-11eb-3b52-997f59fd42f3
@@ -334,8 +334,8 @@ begin
 		ltitle="(b) Ocean"
 	)
 	
-	fbin.savefig(plotsdir("tccdiurnalmean.png"),transparent=false,dpi=200)
-	load(plotsdir("tccdiurnalmean.png"))
+	fbin.savefig(plotsdir("tccmean.png"),transparent=false,dpi=200)
+	load(plotsdir("tccmean.png"))
 end
 
 # ╔═╡ 0fbb0b46-57c2-11eb-365a-a73a2ebda8e4

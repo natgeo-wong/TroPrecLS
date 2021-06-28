@@ -147,18 +147,18 @@ end
 
 # ╔═╡ d0aebfcd-6068-4ff0-9aae-fef936be7a99
 begin
-	pplt.close(); f2,a2 = pplt.subplots(ncols=2,aspect=2,axwidth=3)
+	pplt.close(); f2,a2 = pplt.subplots(nrows=2,aspect=2,axwidth=3)
 	
 	lgd = Dict("ncol"=>1,"frame"=>false)
 	
-	a2[1].plot(csf,ogfrq_TRP,lw=1,c="r")
+	# a2[1].plot(csf,ogfrq_TRP,lw=1,c="r")
 	a2[1].plot(csf,ogfrq_DTP,lw=1,c="k")
 	a2[1].plot(csf,ogfrq_EPO,lw=1,c=lsc[13])
 	a2[1].plot(csf,ogfrq_EIO,lw=1,c=lsc[12])
 	a2[1].plot(csf,ogfrq_EAO,lw=1,c=lsc[11])
 	a2[1].plot(csf,ogfrq_CRB,lw=1,c=lsc[10])
 	a2[1].plot(csf,ogfrq_SEA,lw=1,c=lsc[5])
-	a2[1].plot(csf,lgfrq_TRP,lw=1,c="r",linestyle="--")
+	# a2[1].plot(csf,lgfrq_TRP,lw=1,c="r",linestyle="--")
 	a2[1].plot(csf,lgfrq_DTP,lw=1,c="k",linestyle="--")
 	a2[1].plot(csf,lgfrq_CRB,lw=1,c=lsc[10],linestyle="--")
 	a2[1].plot(csf,lgfrq_SEA,lw=1,c=lsc[5],linestyle="--")
@@ -167,7 +167,7 @@ begin
 	# a2[1].plot(csf,lgfrq_SAS,lw=1,c="r",linestyle="--")
 	a2[1].format(ltitle="(a) GPM Precipitation")
 	
-	a2[2].plot(csf,oefrq_DTP,label="TRP",legend="r",lw=1,c="r")
+	# a2[2].plot(csf,oefrq_DTP,label="TRP",legend="r",lw=1,c="r")
 	a2[2].plot(csf,oefrq_DTP,label="DTP",legend="r",lw=1,c="k")
 	a2[2].plot(csf,oefrq_EPO,label="AR6_EPO",legend="r",lw=1,c=lsc[13])
 	a2[2].plot(csf,oefrq_EIO,label="AR6_EIO",legend="r",lw=1,c=lsc[12])
@@ -176,7 +176,7 @@ begin
 	a2[2].plot(csf,oefrq_SEA,label="SEA",legend="r",lw=1,c=lsc[5])
 	a2[2].plot(csf,csf*NaN,label="AMZ",legend="r",lw=1,c=lsc[4])
 	a2[2].plot(csf,csf*NaN,label="TRA",legend="r",lw=1,c=lsc[3],legend_kw=lgd)
-	a2[2].plot(csf,lefrq_TRP,lw=1,c="r",linestyle="--")
+	# a2[2].plot(csf,lefrq_TRP,lw=1,c="r",linestyle="--")
 	a2[2].plot(csf,lefrq_DTP,lw=1,c="k",linestyle="--")
 	a2[2].plot(csf,lefrq_CRB,lw=1,c=lsc[10],linestyle="--")
 	a2[2].plot(csf,lefrq_SEA,lw=1,c=lsc[5],linestyle="--")
@@ -192,8 +192,8 @@ begin
 		)
 	end
 	
-	f2.savefig(plotsdir("csffreq.png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("csffreq.png"))
+	f2.savefig(plotsdir("csfvprcp.png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("csfvprcp.png"))
 end
 
 # ╔═╡ Cell order:

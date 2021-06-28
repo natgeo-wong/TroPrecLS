@@ -231,8 +231,8 @@ begin
 		ylim=(S-1,N+1),ylabel=L"Latitude / $\degree$",grid=true
 	)
 	
-	freg.savefig(plotsdir("SEA.png"),transparent=false,dpi=200)
-	load(plotsdir("SEA.png"))
+	freg.savefig(plotsdir("domain_SEA.png"),transparent=false,dpi=200)
+	load(plotsdir("domain_SEA.png"))
 end
 
 # ╔═╡ Cell order:

@@ -153,8 +153,8 @@ begin
 		)
 	end
 	
-	f.savefig(plotsdir("tcwvmodel_TRP.png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("tcwvmodel_TRP.png"))
+	f.savefig(plotsdir("tcwvspatial_TRP.png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("tcwvspatial_TRP.png"))
 end
 
 # ╔═╡ 5c0e5bae-554e-11eb-3f83-a364ae0a2485
@@ -234,8 +234,8 @@ begin
 		)
 	end
 	
-	freg.savefig(plotsdir("tcwvmodel_$(geo.regID).png"),transparent=false,dpi=200)
-	PNGFiles.load(plotsdir("tcwvmodel_$(geo.regID).png"))
+	freg.savefig(plotsdir("tcwvspatial_$(geo.regID).png"),transparent=false,dpi=200)
+	PNGFiles.load(plotsdir("tcwvspatial_$(geo.regID).png"))
 end
 
 # ╔═╡ c4792bf2-5552-11eb-3b52-997f59fd42f3
@@ -332,8 +332,8 @@ begin
 		ltitle="(b) Ocean"
 	)
 	
-	fbin.savefig(plotsdir("tcwvdiurnalmean.png"),transparent=false,dpi=200)
-	load(plotsdir("tcwvdiurnalmean.png"))
+	fbin.savefig(plotsdir("tcwvmean.png"),transparent=false,dpi=200)
+	load(plotsdir("tcwvmean.png"))
 end
 
 # ╔═╡ 0fbb0b46-57c2-11eb-365a-a73a2ebda8e4
